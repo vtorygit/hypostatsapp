@@ -6,7 +6,10 @@ import type { ResultBlock } from "../types/results";
 import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
 import { OneProportionZTestForm } from "../components/tools/OneProportionZTestForm";
+import { TwoProportionsZTestForm } from "../components/tools/TwoProportionsZTestForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
+import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
+import { ZPValueForm } from "../components/tools/ZPValueForm";
 import { ResultBlocks } from "../components/results/ResultBlocks";
 import { spendTokens } from "../lib/storage";
 
@@ -139,10 +142,12 @@ export function ToolPage() {
           <div className="content-card">
             <h2>Настройка анализа</h2>
 
-            {tool.id === "one-proportion-z-test" ? (
+            {tool.id === "one-proportion-z-test" && (
               <OneProportionZTestForm dataset={dataset} onRun={handleRun} />
-            ) : (
-              <p>Форма настройки для этого инструмента появится позже.</p>
+            )}
+
+            {tool.id === "two-proportions-z-test" && (
+              <TwoProportionsZTestForm dataset={dataset} onRun={handleRun} />
             )}
           </div>
         </div>
@@ -152,11 +157,15 @@ export function ToolPage() {
         <div className="content-card narrow-card">
           <h2>Настройка расчёта</h2>
 
-          {tool.id === "sample-size-proportion" ? (
+          {tool.id === "sample-size-proportion" && (
             <SampleSizeProportionForm onRun={handleRun} />
-          ) : (
-            <p>Форма настройки для этого калькулятора появится позже.</p>
           )}
+
+          {tool.id === "z-critical-value" && (
+            <ZCriticalValueForm onRun={handleRun} />
+          )}
+
+          {tool.id === "z-p-value" && <ZPValueForm onRun={handleRun} />}
         </div>
       )}
 
