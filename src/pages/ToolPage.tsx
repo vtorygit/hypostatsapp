@@ -6,6 +6,7 @@ import type { ResultBlock } from "../types/results";
 import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
 import { OneProportionZTestForm } from "../components/tools/OneProportionZTestForm";
+import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ResultBlocks } from "../components/results/ResultBlocks";
 import { spendTokens } from "../lib/storage";
 
@@ -19,9 +20,15 @@ export function ToolPage() {
 
   const stage = useMemo(() => {
     if (resultBlocks) return "result";
+
+    if (tool?.inputMode === "calculator") {
+      return "settings";
+    }
+
     if (dataset) return "settings";
+
     return "upload";
-  }, [dataset, resultBlocks]);
+  }, [dataset, resultBlocks, tool?.inputMode]);
 
   if (!tool) {
     return (
@@ -41,11 +48,6 @@ export function ToolPage() {
   }
 
   function handleRun(settings: Record<string, unknown>) {
-    if (!tool?.run || !dataset) {
-      setError("Инструмент пока не настроен.");
-      return;
-    }
-
     const paid = spendTokens(tool.tokenCost);
 
     if (!paid) {
@@ -54,6 +56,23 @@ export function ToolPage() {
     }
 
     try {
+      if (tool.inputMode === "calculator") {
+        if (!tool.runCalculator) {
+          setError("Калькулятор пока не настроен.");
+          return;
+        }
+
+        const blocks = tool.runCalculator(settings);
+        setResultBlocks(blocks);
+        setError(null);
+        return;
+      }
+
+      if (!tool.run || !dataset) {
+        setError("Инструмент пока не настроен.");
+        return;
+      }
+
       const blocks = tool.run(dataset, settings);
       setResultBlocks(blocks);
       setError(null);
@@ -81,20 +100,24 @@ export function ToolPage() {
       </div>
 
       <div className="stage-panel">
-        <div className={`stage-step ${stage === "upload" ? "active" : ""}`}>
-          1. Загрузка данных
-        </div>
+        {tool.inputMode === "dataset" && (
+          <div className={`stage-step ${stage === "upload" ? "active" : ""}`}>
+            1. Загрузка данных
+          </div>
+        )}
+
         <div className={`stage-step ${stage === "settings" ? "active" : ""}`}>
-          2. Настройка
+          {tool.inputMode === "dataset" ? "2. Настройка" : "1. Настройка"}
         </div>
+
         <div className={`stage-step ${stage === "result" ? "active" : ""}`}>
-          3. Результат
+          {tool.inputMode === "dataset" ? "3. Результат" : "2. Результат"}
         </div>
       </div>
 
       {error && <div className="error-box">{error}</div>}
 
-      {stage === "upload" && (
+      {stage === "upload" && tool.inputMode === "dataset" && (
         <div className="content-card">
           <h2>Загрузите данные</h2>
           <p>
@@ -106,7 +129,7 @@ export function ToolPage() {
         </div>
       )}
 
-      {stage === "settings" && dataset && (
+      {stage === "settings" && tool.inputMode === "dataset" && dataset && (
         <div className="two-column-layout">
           <div className="content-card">
             <h2>Проверка файла</h2>
@@ -125,16 +148,28 @@ export function ToolPage() {
         </div>
       )}
 
+      {stage === "settings" && tool.inputMode === "calculator" && (
+        <div className="content-card narrow-card">
+          <h2>Настройка расчёта</h2>
+
+          {tool.id === "sample-size-proportion" ? (
+            <SampleSizeProportionForm onRun={handleRun} />
+          ) : (
+            <p>Форма настройки для этого калькулятора появится позже.</p>
+          )}
+        </div>
+      )}
+
       {stage === "result" && resultBlocks && (
         <div className="content-card">
           <div className="result-header">
             <div>
-              <h2>Результат анализа</h2>
+              <h2>Результат</h2>
               <p>Каждый элемент можно скопировать или скачать отдельно.</p>
             </div>
 
             <button className="secondary-button" onClick={handleStartAgain}>
-              Новый анализ
+              Новый расчёт
             </button>
           </div>
 
@@ -143,4 +178,4 @@ export function ToolPage() {
       )}
     </section>
   );
-}  
+}
