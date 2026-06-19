@@ -7,6 +7,9 @@ import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
 import { OneProportionZTestForm } from "../components/tools/OneProportionZTestForm";
 import { TwoProportionsZTestForm } from "../components/tools/TwoProportionsZTestForm";
+import { OneSampleTTestForm } from "../components/tools/OneSampleTTestForm";
+import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamplesTTestForm";
+import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
 import { ZPValueForm } from "../components/tools/ZPValueForm";
@@ -148,6 +151,18 @@ export function ToolPage() {
 
             {tool.id === "two-proportions-z-test" && (
               <TwoProportionsZTestForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {tool.id === "one-sample-t-test" && (
+              <OneSampleTTestForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {tool.id === "independent-samples-t-test" && (
+              <IndependentSamplesTTestForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {tool.id === "paired-samples-t-test" && (
+              <PairedSamplesTTestForm dataset={dataset} onRun={handleRun} />
             )}
           </div>
         </div>
