@@ -18,4 +18,5 @@ export type ToolDefinition = {
   tokenCost: number;
   inputMode: ToolInputMode;
   run?: (dataset: Dataset, settings: Record<string, unknown>) => ResultBlock[];
+  runCalculator?: (settings: Record<string, unknown>) => ResultBlock[];
 };
