@@ -6,6 +6,8 @@ import { runIndependentSamplesTTest } from "./hypothesis/independentSamplesTTest
 import { runPairedSamplesTTest } from "./hypothesis/pairedSamplesTTest";
 import { runChiSquareIndependenceTest } from "./hypothesis/chiSquareIndependenceTest";
 import { runChiSquareGoodnessOfFitTest } from "./hypothesis/chiSquareGoodnessOfFitTest";
+import { runPearsonCorrelation } from "./relationships/pearsonCorrelation";
+import { runSpearmanCorrelation } from "./relationships/spearmanCorrelation";
 import { runSampleSizeProportionCalculator } from "./calculators/sampleSizeProportion";
 import { runZCriticalValueCalculator } from "./calculators/zCriticalValue";
 import { runZPValueCalculator } from "./calculators/zPValue";
@@ -80,6 +82,26 @@ export const tools: ToolDefinition[] = [
     tokenCost: 7,
     inputMode: "dataset",
     run: runChiSquareGoodnessOfFitTest
+  },
+  {
+    id: "pearson-correlation",
+    title: "Корреляция Пирсона",
+    groupId: "relationships",
+    description:
+      "Оценивает линейную связь между двумя числовыми переменными.",
+    tokenCost: 4,
+    inputMode: "dataset",
+    run: runPearsonCorrelation
+  },
+  {
+    id: "spearman-correlation",
+    title: "Корреляция Спирмена",
+    groupId: "relationships",
+    description:
+      "Оценивает монотонную связь между двумя переменными на основе рангов.",
+    tokenCost: 4,
+    inputMode: "dataset",
+    run: runSpearmanCorrelation
   },
   {
     id: "sample-size-proportion",
