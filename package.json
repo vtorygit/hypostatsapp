@@ -1,8 +1,7 @@
 {
-  "name": "research-toolbox",
+  "name": "hypostatsapp",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://YOUR_GITHUB_USERNAME.github.io/research-toolbox/",
   "type": "module",
   "scripts": {
     "dev": "vite",
