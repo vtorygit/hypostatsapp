@@ -12,6 +12,7 @@ import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamp
 import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
 import { ChiSquareIndependenceForm } from "../components/tools/ChiSquareIndependenceForm";
 import { ChiSquareGoodnessOfFitForm } from "../components/tools/ChiSquareGoodnessOfFitForm";
+import { CorrelationForm } from "../components/tools/CorrelationForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
 import { ZPValueForm } from "../components/tools/ZPValueForm";
@@ -173,6 +174,11 @@ export function ToolPage() {
 
             {tool.id === "chi-square-goodness-of-fit-test" && (
               <ChiSquareGoodnessOfFitForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {(tool.id === "pearson-correlation" ||
+              tool.id === "spearman-correlation") && (
+              <CorrelationForm dataset={dataset} onRun={handleRun} />
             )}
           </div>
         </div>
