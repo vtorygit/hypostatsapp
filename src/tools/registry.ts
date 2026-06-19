@@ -4,6 +4,8 @@ import { runTwoProportionsZTest } from "./hypothesis/twoProportionsZTest";
 import { runOneSampleTTest } from "./hypothesis/oneSampleTTest";
 import { runIndependentSamplesTTest } from "./hypothesis/independentSamplesTTest";
 import { runPairedSamplesTTest } from "./hypothesis/pairedSamplesTTest";
+import { runChiSquareIndependenceTest } from "./hypothesis/chiSquareIndependenceTest";
+import { runChiSquareGoodnessOfFitTest } from "./hypothesis/chiSquareGoodnessOfFitTest";
 import { runSampleSizeProportionCalculator } from "./calculators/sampleSizeProportion";
 import { runZCriticalValueCalculator } from "./calculators/zCriticalValue";
 import { runZPValueCalculator } from "./calculators/zPValue";
@@ -58,6 +60,26 @@ export const tools: ToolDefinition[] = [
     tokenCost: 7,
     inputMode: "dataset",
     run: runPairedSamplesTTest
+  },
+  {
+    id: "chi-square-independence-test",
+    title: "χ²-критерий независимости",
+    groupId: "hypothesis-testing",
+    description:
+      "Проверяет, есть ли статистически значимая связь между двумя категориальными переменными.",
+    tokenCost: 7,
+    inputMode: "dataset",
+    run: runChiSquareIndependenceTest
+  },
+  {
+    id: "chi-square-goodness-of-fit-test",
+    title: "χ²-критерий согласия",
+    groupId: "hypothesis-testing",
+    description:
+      "Проверяет, отличается ли наблюдаемое распределение одной категориальной переменной от ожидаемого.",
+    tokenCost: 7,
+    inputMode: "dataset",
+    run: runChiSquareGoodnessOfFitTest
   },
   {
     id: "sample-size-proportion",
