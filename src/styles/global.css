@@ -440,3 +440,11 @@ th {
     flex-direction: column;
   }
 }
+.narrow-card {
+  width: min(680px, 100%);
+}
+
+.form-hint {
+  margin: -2px 0 0;
+  font-size: 14px;
+}
