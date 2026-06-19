@@ -1,6 +1,9 @@
 import type { ToolDefinition } from "../types/tools";
 import { runOneProportionZTest } from "./hypothesis/oneProportionZTest";
 import { runTwoProportionsZTest } from "./hypothesis/twoProportionsZTest";
+import { runOneSampleTTest } from "./hypothesis/oneSampleTTest";
+import { runIndependentSamplesTTest } from "./hypothesis/independentSamplesTTest";
+import { runPairedSamplesTTest } from "./hypothesis/pairedSamplesTTest";
 import { runSampleSizeProportionCalculator } from "./calculators/sampleSizeProportion";
 import { runZCriticalValueCalculator } from "./calculators/zCriticalValue";
 import { runZPValueCalculator } from "./calculators/zPValue";
@@ -25,6 +28,36 @@ export const tools: ToolDefinition[] = [
     tokenCost: 7,
     inputMode: "dataset",
     run: runTwoProportionsZTest
+  },
+  {
+    id: "one-sample-t-test",
+    title: "t-тест для одной выборки",
+    groupId: "hypothesis-testing",
+    description:
+      "Проверяет, отличается ли среднее значение числовой переменной от заданной константы.",
+    tokenCost: 5,
+    inputMode: "dataset",
+    run: runOneSampleTTest
+  },
+  {
+    id: "independent-samples-t-test",
+    title: "t-тест для независимых выборок",
+    groupId: "hypothesis-testing",
+    description:
+      "Сравнивает средние значения числовой переменной в двух независимых группах.",
+    tokenCost: 7,
+    inputMode: "dataset",
+    run: runIndependentSamplesTTest
+  },
+  {
+    id: "paired-samples-t-test",
+    title: "Парный t-тест",
+    groupId: "hypothesis-testing",
+    description:
+      "Сравнивает два связанных измерения: например, значение до и после.",
+    tokenCost: 7,
+    inputMode: "dataset",
+    run: runPairedSamplesTTest
   },
   {
     id: "sample-size-proportion",
