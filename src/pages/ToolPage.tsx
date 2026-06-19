@@ -10,6 +10,8 @@ import { TwoProportionsZTestForm } from "../components/tools/TwoProportionsZTest
 import { OneSampleTTestForm } from "../components/tools/OneSampleTTestForm";
 import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamplesTTestForm";
 import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
+import { ChiSquareIndependenceForm } from "../components/tools/ChiSquareIndependenceForm";
+import { ChiSquareGoodnessOfFitForm } from "../components/tools/ChiSquareGoodnessOfFitForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
 import { ZPValueForm } from "../components/tools/ZPValueForm";
@@ -163,6 +165,14 @@ export function ToolPage() {
 
             {tool.id === "paired-samples-t-test" && (
               <PairedSamplesTTestForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {tool.id === "chi-square-independence-test" && (
+              <ChiSquareIndependenceForm dataset={dataset} onRun={handleRun} />
+            )}
+
+            {tool.id === "chi-square-goodness-of-fit-test" && (
+              <ChiSquareGoodnessOfFitForm dataset={dataset} onRun={handleRun} />
             )}
           </div>
         </div>
