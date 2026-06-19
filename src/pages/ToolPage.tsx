@@ -21,7 +21,7 @@ import { spendTokens } from "../lib/storage";
 
 export function ToolPage() {
   const { toolId } = useParams();
-  const tool = getToolById(toolId);
+  const foundTool = getToolById(toolId);
 
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [resultBlocks, setResultBlocks] = useState<ResultBlock[] | null>(null);
@@ -30,16 +30,16 @@ export function ToolPage() {
   const stage = useMemo(() => {
     if (resultBlocks) return "result";
 
-    if (tool?.inputMode === "calculator") {
+    if (foundTool?.inputMode === "calculator") {
       return "settings";
     }
 
     if (dataset) return "settings";
 
     return "upload";
-  }, [dataset, resultBlocks, tool?.inputMode]);
+  }, [dataset, resultBlocks, foundTool?.inputMode]);
 
-  if (!tool) {
+  if (!foundTool) {
     return (
       <section className="page narrow-page">
         <h1>Инструмент не найден</h1>
@@ -49,6 +49,8 @@ export function ToolPage() {
       </section>
     );
   }
+
+  const tool = foundTool;
 
   function handleDatasetLoaded(nextDataset: Dataset) {
     setDataset(nextDataset);
