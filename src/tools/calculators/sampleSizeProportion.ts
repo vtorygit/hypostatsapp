@@ -1,9 +1,9 @@
 import { jStat } from "jstat";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 export function runSampleSizeProportionCalculator(
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const confidenceLevel = Number(settings.confidenceLevel);
   const marginOfError = Number(settings.marginOfError);
   const expectedProportionRaw = settings.expectedProportion;
@@ -40,7 +40,7 @@ export function runSampleSizeProportionCalculator(
 
   const roundedN = Math.ceil(rawN);
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Расчёт размера выборки для доли",
@@ -82,5 +82,5 @@ export function runSampleSizeProportionCalculator(
       title: "Вывод",
       content: `Для оценки доли с уровнем доверия ${confidenceLevel} и погрешностью не больше ${marginOfError} нужен размер выборки не менее ${roundedN}.`
     }
-  ];
+  ]);
 }
