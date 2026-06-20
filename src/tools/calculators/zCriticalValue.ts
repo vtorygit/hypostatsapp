@@ -1,11 +1,11 @@
 import { jStat } from "jstat";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 type TailType = "two-sided" | "left" | "right";
 
 export function runZCriticalValueCalculator(
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const alpha = Number(settings.alpha);
   const tailType = settings.tailType as TailType;
 
@@ -27,7 +27,7 @@ export function runZCriticalValueCalculator(
     interpretation = `Для двустороннего теста критические значения равны ±${criticalValue.toFixed(4)}.`;
   }
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Критическое значение Z",
@@ -51,5 +51,5 @@ export function runZCriticalValueCalculator(
       title: "Вывод",
       content: interpretation
     }
-  ];
+  ]);
 }

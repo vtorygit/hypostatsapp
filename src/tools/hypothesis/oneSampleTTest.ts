@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 import {
   getNumericValues,
   mean,
@@ -25,7 +25,7 @@ function getPValue(t: number, df: number, alternative: Alternative): number {
 export function runOneSampleTTest(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const column = String(settings.column);
   const mu0 = Number(settings.mu0);
   const alpha = Number(settings.alpha);
@@ -59,7 +59,7 @@ export function runOneSampleTTest(
       ? "Нулевая гипотеза отвергается."
       : "Нет оснований отвергнуть нулевую гипотезу.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Результаты t-теста для одной выборки",
@@ -87,5 +87,5 @@ export function runOneSampleTTest(
       title: "Вывод",
       content: decision
     }
-  ];
+  ]);
 }

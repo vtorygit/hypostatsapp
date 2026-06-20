@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 function rank(values: number[]): number[] {
   const sorted = values
@@ -48,7 +48,7 @@ function pearsonFromArrays(x: number[], y: number[]): number {
 export function runSpearmanCorrelation(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const xColumn = String(settings.xColumn);
   const yColumn = String(settings.yColumn);
   const alpha = Number(settings.alpha);
@@ -96,7 +96,7 @@ export function runSpearmanCorrelation(
       ? "Нулевая гипотеза отвергается."
       : "Нет оснований отвергнуть нулевую гипотезу.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Корреляция Спирмена",
@@ -121,5 +121,5 @@ export function runSpearmanCorrelation(
       title: "Вывод",
       content: `${decision} Коэффициент Спирмена показывает монотонную связь между переменными.`
     }
-  ];
+  ]);
 }

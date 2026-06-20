@@ -1,5 +1,5 @@
 import { jStat } from "jstat";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 type Alternative = "two-sided" | "less" | "greater";
 
@@ -17,7 +17,7 @@ function getPValue(z: number, alternative: Alternative): number {
 
 export function runZPValueCalculator(
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const z = Number(settings.z);
   const alpha = Number(settings.alpha);
   const alternative = settings.alternative as Alternative;
@@ -37,7 +37,7 @@ export function runZPValueCalculator(
       ? "Нулевая гипотеза отвергается."
       : "Нет оснований отвергнуть нулевую гипотезу.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "p-value для Z-статистики",
@@ -59,5 +59,5 @@ export function runZPValueCalculator(
       title: "Вывод",
       content: decision
     }
-  ];
+  ]);
 }

@@ -40,3 +40,9 @@ export function downloadBlob(blob: Blob, fileName: string): void {
 
   URL.revokeObjectURL(url);
 }
+
+export async function downloadImage(src: string, fileName: string): Promise<void> {
+  const response = await fetch(src);
+  const blob = await response.blob();
+  downloadBlob(blob, fileName);
+}

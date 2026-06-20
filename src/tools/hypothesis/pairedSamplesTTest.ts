@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 import {
   mean,
   sampleStandardDeviation,
@@ -24,7 +24,7 @@ function getPValue(t: number, df: number, alternative: Alternative): number {
 export function runPairedSamplesTTest(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const beforeColumn = String(settings.beforeColumn);
   const afterColumn = String(settings.afterColumn);
   const alpha = Number(settings.alpha);
@@ -75,7 +75,7 @@ export function runPairedSamplesTTest(
       ? "Нулевая гипотеза отвергается."
       : "Нет оснований отвергнуть нулевую гипотезу.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Результаты парного t-теста",
@@ -103,5 +103,5 @@ export function runPairedSamplesTTest(
       title: "Вывод",
       content: decision
     }
-  ];
+  ]);
 }
