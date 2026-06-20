@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 import { mean, sampleVariance, validateNumericSample } from "../../lib/numeric";
 
 type Alternative = "two-sided" | "less" | "greater";
@@ -32,7 +32,7 @@ function getGroupValues(
 export function runIndependentSamplesTTest(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const valueColumn = String(settings.valueColumn);
   const groupColumn = String(settings.groupColumn);
   const group1Value = String(settings.group1Value);
@@ -82,7 +82,7 @@ export function runIndependentSamplesTTest(
       ? "Нулевая гипотеза отвергается."
       : "Нет оснований отвергнуть нулевую гипотезу.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Результаты t-теста для независимых выборок",
@@ -112,5 +112,5 @@ export function runIndependentSamplesTTest(
       title: "Вывод",
       content: `${decision} Использован вариант Welch t-test без предположения о равенстве дисперсий.`
     }
-  ];
+  ]);
 }

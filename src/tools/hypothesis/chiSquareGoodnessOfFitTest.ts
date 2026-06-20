@@ -1,13 +1,13 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 type ExpectedMode = "equal" | "custom";
 
 export function runChiSquareGoodnessOfFitTest(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const column = String(settings.column);
   const alpha = Number(settings.alpha);
   const expectedMode = settings.expectedMode as ExpectedMode;
@@ -84,7 +84,7 @@ export function runChiSquareGoodnessOfFitTest(
       ? "Наблюдаемое распределение статистически значимо отличается от ожидаемого."
       : "Статистически значимого отличия от ожидаемого распределения не обнаружено.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Наблюдаемые и ожидаемые частоты",
@@ -120,5 +120,5 @@ export function runChiSquareGoodnessOfFitTest(
       title: "Вывод",
       content: `${decision} ${conclusion}`
     }
-  ];
+  ]);
 }

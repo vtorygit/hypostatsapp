@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 type Alternative = "two-sided" | "less" | "greater";
 
@@ -31,7 +31,7 @@ function getAlternativeText(alternative: Alternative): string {
 export function runOneProportionZTest(
   _dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const successes = Number(settings.successes);
   const sampleSize = Number(settings.sampleSize);
   const hypothesizedProportion = Number(settings.hypothesizedProportion);
@@ -82,7 +82,7 @@ export function runOneProportionZTest(
           alternative
         )}, нет.`;
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Результаты Z-теста для одной доли",
@@ -122,5 +122,5 @@ export function runOneProportionZTest(
       title: "Вывод",
       content: `${decision} ${conclusion}`
     }
-  ];
+  ]);
 }

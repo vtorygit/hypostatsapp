@@ -1,11 +1,11 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 export function runChiSquareIndependenceTest(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const rowColumn = String(settings.rowColumn);
   const columnColumn = String(settings.columnColumn);
   const alpha = Number(settings.alpha);
@@ -119,7 +119,7 @@ export function runChiSquareIndependenceTest(
     return row;
   });
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Наблюдаемые частоты",
@@ -155,5 +155,5 @@ export function runChiSquareIndependenceTest(
       title: "Вывод",
       content: `${decision} ${conclusion}`
     }
-  ];
+  ]);
 }
