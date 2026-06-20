@@ -1,6 +1,6 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
-import type { ResultBlock } from "../../types/results";
+import { createCalculationResult, type CalculationResult } from "../../types/results";
 
 function mean(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
@@ -9,7 +9,7 @@ function mean(values: number[]): number {
 export function runPearsonCorrelation(
   dataset: Dataset,
   settings: Record<string, unknown>
-): ResultBlock[] {
+): CalculationResult {
   const xColumn = String(settings.xColumn);
   const yColumn = String(settings.yColumn);
   const alpha = Number(settings.alpha);
@@ -70,7 +70,7 @@ export function runPearsonCorrelation(
       ? "Заметная."
       : "Сильная.";
 
-  return [
+  return createCalculationResult([
     {
       type: "table",
       title: "Корреляция Пирсона",
@@ -115,5 +115,5 @@ export function runPearsonCorrelation(
         4
       )}. Связь: ${interpretation}`
     }
-  ];
+  ]);
 }
