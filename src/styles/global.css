@@ -187,6 +187,43 @@ p {
   font-weight: 700;
 }
 
+.small-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.result-metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.result-metadata div {
+  display: grid;
+  gap: 5px;
+}
+
+.result-metadata span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.result-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+
 .primary-button {
   padding: 14px 22px;
   background: var(--text);
@@ -432,7 +469,8 @@ th {
     font-size: 42px;
   }
 
-  .dataset-meta {
+  .dataset-meta,
+  .result-metadata {
     grid-template-columns: 1fr;
   }
 
@@ -447,4 +485,36 @@ th {
 .form-hint {
   margin: -2px 0 0;
   font-size: 14px;
+}
+
+.checkbox-list,
+.recode-list {
+  display: grid;
+  gap: 10px;
+}
+
+.checkbox-list label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 400;
+}
+
+.checkbox-list input {
+  width: auto;
+}
+
+.recode-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 2fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.recode-row input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }

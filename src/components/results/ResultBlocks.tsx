@@ -1,13 +1,30 @@
-import type { ResultBlock } from "../../types/results";
-import { downloadCsv, copyText } from "../../lib/exports";
+import type { AnalysisResult } from "../../types/results";
+import { downloadCsv, copyText, downloadImage } from "../../lib/exports";
 
 type ResultBlocksProps = {
-  blocks: ResultBlock[];
+  result: AnalysisResult;
 };
 
-export function ResultBlocks({ blocks }: ResultBlocksProps) {
+export function ResultBlocks({ result }: ResultBlocksProps) {
+  const { blocks, metadata } = result;
+
   return (
     <div className="result-blocks">
+      <div className="result-metadata">
+        <div>
+          <span>Инструмент</span>
+          <strong>{metadata.toolTitle}</strong>
+        </div>
+        <div>
+          <span>Источник</span>
+          <strong>{metadata.source}</strong>
+        </div>
+        <div>
+          <span>Дата расчёта</span>
+          <strong>{new Date(metadata.createdAt).toLocaleString("ru-RU")}</strong>
+        </div>
+      </div>
+
       {blocks.map((block, index) => {
         if (block.type === "table") {
           return (
@@ -25,6 +42,9 @@ export function ResultBlocks({ blocks }: ResultBlocksProps) {
                   }
                 >
                   Скачать CSV
+                </button>
+                <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                  В отчёт
                 </button>
               </div>
 
@@ -53,6 +73,28 @@ export function ResultBlocks({ blocks }: ResultBlocksProps) {
           );
         }
 
+        if (block.type === "image") {
+          return (
+            <div key={index} className="result-block">
+              <div className="result-block-header">
+                <h3>{block.title}</h3>
+                <div className="result-actions">
+                  <button
+                    className="small-button"
+                    onClick={() => void downloadImage(block.src, block.fileName ?? "result.png")}
+                  >
+                    Скачать PNG
+                  </button>
+                  <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                    В отчёт
+                  </button>
+                </div>
+              </div>
+              <img className="result-image" src={block.src} alt={block.alt} />
+            </div>
+          );
+        }
+
         if (block.type === "formula") {
           return (
             <div key={index} className="result-block">
@@ -63,6 +105,9 @@ export function ResultBlocks({ blocks }: ResultBlocksProps) {
                   onClick={() => copyText(block.content)}
                 >
                   Скопировать
+                </button>
+                <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                  В отчёт
                 </button>
               </div>
 
@@ -80,6 +125,9 @@ export function ResultBlocks({ blocks }: ResultBlocksProps) {
                 onClick={() => copyText(block.content)}
               >
                 Скопировать
+              </button>
+              <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                В отчёт
               </button>
             </div>
 

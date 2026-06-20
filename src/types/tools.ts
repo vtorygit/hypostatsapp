@@ -1,5 +1,6 @@
+import type { ComponentType } from "react";
 import type { Dataset } from "./dataset";
-import type { ResultBlock } from "./results";
+import type { CalculationResult } from "./results";
 
 export type ToolGroupId =
   | "data-preparation"
@@ -10,13 +11,32 @@ export type ToolGroupId =
 
 export type ToolInputMode = "dataset" | "calculator";
 
-export type ToolDefinition = {
+export type ToolFormProps = {
+  onRun: (settings: Record<string, unknown>) => void;
+};
+
+export type DatasetToolFormProps = ToolFormProps & {
+  dataset: Dataset;
+};
+
+type ToolDefinitionBase = {
   id: string;
   title: string;
   groupId: ToolGroupId;
   description: string;
   tokenCost: number;
-  inputMode: ToolInputMode;
-  run?: (dataset: Dataset, settings: Record<string, unknown>) => ResultBlock[];
-  runCalculator?: (settings: Record<string, unknown>) => ResultBlock[];
 };
+
+export type DatasetToolDefinition = ToolDefinitionBase & {
+  inputMode: "dataset";
+  formComponent: ComponentType<DatasetToolFormProps>;
+  run: (dataset: Dataset, settings: Record<string, unknown>) => CalculationResult;
+};
+
+export type CalculatorToolDefinition = ToolDefinitionBase & {
+  inputMode: "calculator";
+  formComponent: ComponentType<ToolFormProps>;
+  run: (settings: Record<string, unknown>) => CalculationResult;
+};
+
+export type ToolDefinition = DatasetToolDefinition | CalculatorToolDefinition;

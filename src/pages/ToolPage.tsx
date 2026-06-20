@@ -2,20 +2,9 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getToolById } from "../tools/registry";
 import type { Dataset } from "../types/dataset";
-import type { ResultBlock } from "../types/results";
+import type { AnalysisResult, CalculationResult } from "../types/results";
 import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
-import { OneProportionZTestForm } from "../components/tools/OneProportionZTestForm";
-import { TwoProportionsZTestForm } from "../components/tools/TwoProportionsZTestForm";
-import { OneSampleTTestForm } from "../components/tools/OneSampleTTestForm";
-import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamplesTTestForm";
-import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
-import { ChiSquareIndependenceForm } from "../components/tools/ChiSquareIndependenceForm";
-import { ChiSquareGoodnessOfFitForm } from "../components/tools/ChiSquareGoodnessOfFitForm";
-import { CorrelationForm } from "../components/tools/CorrelationForm";
-import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
-import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
-import { ZPValueForm } from "../components/tools/ZPValueForm";
 import { ResultBlocks } from "../components/results/ResultBlocks";
 import { spendTokens } from "../lib/storage";
 
@@ -24,11 +13,11 @@ export function ToolPage() {
   const foundTool = getToolById(toolId);
 
   const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [resultBlocks, setResultBlocks] = useState<ResultBlock[] | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const stage = useMemo(() => {
-    if (resultBlocks) return "result";
+    if (result) return "result";
 
     if (foundTool?.inputMode === "calculator") {
       return "settings";
@@ -37,7 +26,7 @@ export function ToolPage() {
     if (dataset) return "settings";
 
     return "upload";
-  }, [dataset, resultBlocks, foundTool?.inputMode]);
+  }, [dataset, result, foundTool?.inputMode]);
 
   if (!foundTool) {
     return (
@@ -54,7 +43,7 @@ export function ToolPage() {
 
   function handleDatasetLoaded(nextDataset: Dataset) {
     setDataset(nextDataset);
-    setResultBlocks(null);
+    setResult(null);
     setError(null);
   }
 
@@ -67,25 +56,30 @@ export function ToolPage() {
     }
 
     try {
+      let calculation: CalculationResult;
+
       if (tool.inputMode === "calculator") {
-        if (!tool.runCalculator) {
-          setError("Калькулятор пока не настроен.");
+        calculation = tool.run(settings);
+      } else {
+        if (!dataset) {
+          setError("Сначала загрузите данные.");
           return;
         }
 
-        const blocks = tool.runCalculator(settings);
-        setResultBlocks(blocks);
-        setError(null);
-        return;
+        calculation = tool.run(dataset, settings);
       }
 
-      if (!tool.run || !dataset) {
-        setError("Инструмент пока не настроен.");
-        return;
-      }
-
-      const blocks = tool.run(dataset, settings);
-      setResultBlocks(blocks);
+      setResult({
+        ...calculation,
+        metadata: {
+          title: tool.title,
+          description: tool.description,
+          source: dataset?.fileName ?? "Параметры, введённые пользователем",
+          createdAt: new Date().toISOString(),
+          toolId: tool.id,
+          toolTitle: tool.title
+        }
+      });
       setError(null);
     } catch (runError) {
       setError(
@@ -98,7 +92,7 @@ export function ToolPage() {
 
   function handleStartAgain() {
     setDataset(null);
-    setResultBlocks(null);
+    setResult(null);
     setError(null);
   }
 
@@ -150,38 +144,7 @@ export function ToolPage() {
           <div className="content-card">
             <h2>Настройка анализа</h2>
 
-            {tool.id === "one-proportion-z-test" && (
-              <OneProportionZTestForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "two-proportions-z-test" && (
-              <TwoProportionsZTestForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "one-sample-t-test" && (
-              <OneSampleTTestForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "independent-samples-t-test" && (
-              <IndependentSamplesTTestForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "paired-samples-t-test" && (
-              <PairedSamplesTTestForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "chi-square-independence-test" && (
-              <ChiSquareIndependenceForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {tool.id === "chi-square-goodness-of-fit-test" && (
-              <ChiSquareGoodnessOfFitForm dataset={dataset} onRun={handleRun} />
-            )}
-
-            {(tool.id === "pearson-correlation" ||
-              tool.id === "spearman-correlation") && (
-              <CorrelationForm dataset={dataset} onRun={handleRun} />
-            )}
+            <tool.formComponent dataset={dataset} onRun={handleRun} />
           </div>
         </div>
       )}
@@ -190,19 +153,11 @@ export function ToolPage() {
         <div className="content-card narrow-card">
           <h2>Настройка расчёта</h2>
 
-          {tool.id === "sample-size-proportion" && (
-            <SampleSizeProportionForm onRun={handleRun} />
-          )}
-
-          {tool.id === "z-critical-value" && (
-            <ZCriticalValueForm onRun={handleRun} />
-          )}
-
-          {tool.id === "z-p-value" && <ZPValueForm onRun={handleRun} />}
+          <tool.formComponent onRun={handleRun} />
         </div>
       )}
 
-      {stage === "result" && resultBlocks && (
+      {stage === "result" && result && (
         <div className="content-card">
           <div className="result-header">
             <div>
@@ -215,7 +170,7 @@ export function ToolPage() {
             </button>
           </div>
 
-          <ResultBlocks blocks={resultBlocks} />
+          <ResultBlocks result={result} />
         </div>
       )}
     </section>
