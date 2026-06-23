@@ -22,37 +22,54 @@ import { CorrelationForm } from "../components/tools/CorrelationForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
 import { ZPValueForm } from "../components/tools/ZPValueForm";
-import { runDataPreview, runMissingValues, runDuplicatesCheck, runCategoryRecode } from "./dataPreparation/dataPreparation";
-import { DataPreviewForm, MissingValuesForm, DuplicatesCheckForm, CategoryRecodeForm } from "../components/tools/DataPreparationForms";
+import { runDataPreview, runMissingValues, runCategoryRecode } from "./dataPreparation/dataPreparation";
+import { DataPreviewForm, MissingValuesForm, CategoryRecodeForm } from "../components/tools/DataPreparationForms";
 import { runSampleSizeMean, runConfidenceIntervalMean, runConfidenceIntervalProportion, runCohensD } from "./calculators/advancedCalculators";
 import { SampleSizeMeanForm, ConfidenceIntervalMeanForm, ConfidenceIntervalProportionForm, CohensDForm } from "../components/tools/AdvancedCalculatorForms";
 import { runCorrelationMatrix } from "./relationships/correlationMatrix";
 import { CorrelationMatrixForm } from "../components/tools/CorrelationMatrixForm";
-import { runSimpleLinearRegression } from "./regression/simpleLinearRegression";
-import { SimpleLinearRegressionForm } from "../components/tools/SimpleLinearRegressionForm";
+import { runMultipleLinearRegression } from "./regression/multipleLinearRegression";
+import { MultipleLinearRegressionForm } from "../components/tools/MultipleLinearRegressionForm";
+import { MultipleLinearRegressionResult } from "../components/results/MultipleLinearRegressionResult";
 import { runMannWhitneyUTest, runWilcoxonSignedRankTest, runKruskalWallisTest, runSignTest } from "./hypothesis/nonparametricTests";
 import { MannWhitneyForm, WilcoxonSignedRankForm, KruskalWallisForm, SignTestForm } from "../components/tools/NonparametricForms";
+import { runStatisticalTestCalculator } from "./calculators/statisticalTestCalculator";
+import { StatisticalTestCalculatorForm } from "../components/tools/StatisticalTestCalculatorForm";
 
 export const tools: ToolDefinition[] = [
   {
     id: "data-preview", title: "Просмотр данных", groupId: "data-preparation",
     description: "Показывает структуру и первые 10 строк загруженного файла.", tokenCost: 1,
-    inputMode: "dataset", formComponent: DataPreviewForm, run: runDataPreview
+    inputMode: "dataset", formComponent: DataPreviewForm, run: runDataPreview,
+    runOnUpload: true,
+    resultHint: "Структура и первые строки загруженного набора данных."
   },
   {
     id: "missing-values", title: "Пропуски в данных", groupId: "data-preparation",
     description: "Считает количество и долю пропусков по каждому столбцу.", tokenCost: 2,
-    inputMode: "dataset", formComponent: MissingValuesForm, run: runMissingValues
-  },
-  {
-    id: "duplicates-check", title: "Дубликаты", groupId: "data-preparation",
-    description: "Находит полностью совпадающие строки и оценивает их долю.", tokenCost: 2,
-    inputMode: "dataset", formComponent: DuplicatesCheckForm, run: runDuplicatesCheck
+    inputMode: "dataset", formComponent: MissingValuesForm, run: runMissingValues,
+    settingsLayout: "full",
+    settingsTitle: "Настройка обработки пропусков",
+    showDatasetPreview: false,
+    resultHint: "Проверьте обработанные данные и скачайте полный набор."
   },
   {
     id: "category-recode", title: "Перекодировка категорий", groupId: "data-preparation",
     description: "Заменяет значения категорий и создаёт новую таблицу для экспорта.", tokenCost: 3,
-    inputMode: "dataset", formComponent: CategoryRecodeForm, run: runCategoryRecode
+    inputMode: "dataset", formComponent: CategoryRecodeForm, run: runCategoryRecode,
+    settingsLayout: "full",
+    showDatasetPreview: false,
+    resultHint: "Скачайте таблицу с перекодированной переменной."
+  },
+  {
+    id: "statistical-test-calculator",
+    title: "Статистический калькулятор",
+    groupId: "hypothesis-testing",
+    description: "Позволяет выбрать статистический тест и ввести исходные значения вручную.",
+    tokenCost: 5,
+    inputMode: "calculator",
+    formComponent: StatisticalTestCalculatorForm,
+    run: runStatisticalTestCalculator
   },
   {
     id: "one-proportion-z-test",
@@ -179,9 +196,13 @@ export const tools: ToolDefinition[] = [
     inputMode: "dataset", formComponent: CorrelationMatrixForm, run: runCorrelationMatrix
   },
   {
-    id: "simple-linear-regression", title: "Простая линейная регрессия", groupId: "regression",
-    description: "Оценивает линейную модель, коэффициенты, R², прогнозы и остатки.", tokenCost: 8,
-    inputMode: "dataset", formComponent: SimpleLinearRegressionForm, run: runSimpleLinearRegression
+    id: "multiple-linear-regression", title: "Линейная регрессия", groupId: "regression",
+    description: "Оценивает модель с одним или несколькими предикторами, коэффициенты, качество и предпосылки.", tokenCost: 8,
+    inputMode: "dataset", formComponent: MultipleLinearRegressionForm,
+    run: runMultipleLinearRegression,
+    settingsLayout: "full",
+    showDatasetPreview: false,
+    resultComponent: MultipleLinearRegressionResult
   },
   {
     id: "sample-size-proportion",

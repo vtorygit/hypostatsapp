@@ -31,7 +31,7 @@ export function PairedSamplesTTestForm({
   return (
     <form className="tool-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="beforeColumn">Первый замер / до</label>
+        <label htmlFor="beforeColumn">Числовая переменная: первый замер</label>
         <select
           id="beforeColumn"
           value={beforeColumn}
@@ -46,7 +46,7 @@ export function PairedSamplesTTestForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="afterColumn">Второй замер / после</label>
+        <label htmlFor="afterColumn">Числовая переменная: второй замер</label>
         <select
           id="afterColumn"
           value={afterColumn}
@@ -75,7 +75,7 @@ export function PairedSamplesTTestForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="alternative">Альтернативная гипотеза</label>
+        <label htmlFor="alternative">Гипотеза</label>
         <select
           id="alternative"
           value={alternative}

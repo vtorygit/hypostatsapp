@@ -16,7 +16,6 @@ export function Layout({ children }: LayoutProps) {
         </Link>
 
         <div className="header-meta">
-          <span className="privacy-label">Local only</span>
           <TokenBadge compact />
         </div>
       </header>

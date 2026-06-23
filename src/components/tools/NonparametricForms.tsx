@@ -8,8 +8,8 @@ function AlphaField({ value, onChange }: { value: string; onChange: (value: stri
 function PairedForm({ dataset, onRun, label }: DatasetToolFormProps & { label: string }) {
   const [beforeColumn, setBefore] = useState(dataset.columns[0] ?? ""); const [afterColumn, setAfter] = useState(dataset.columns[1] ?? dataset.columns[0] ?? ""); const [alpha, setAlpha] = useState("0.05");
   return <form className="tool-form" onSubmit={(e) => { e.preventDefault(); onRun({ beforeColumn, afterColumn, alpha: +alpha }); }}>
-    <div className="form-group"><label>Первый столбец / до</label><select value={beforeColumn} onChange={(e) => setBefore(e.target.value)}>{dataset.columns.map((column) => <option key={column}>{column}</option>)}</select></div>
-    <div className="form-group"><label>Второй столбец / после</label><select value={afterColumn} onChange={(e) => setAfter(e.target.value)}>{dataset.columns.map((column) => <option key={column}>{column}</option>)}</select></div>
+    <div className="form-group"><label>Числовая переменная: первый замер</label><select value={beforeColumn} onChange={(e) => setBefore(e.target.value)}>{dataset.columns.map((column) => <option key={column}>{column}</option>)}</select></div>
+    <div className="form-group"><label>Числовая переменная: второй замер</label><select value={afterColumn} onChange={(e) => setAfter(e.target.value)}>{dataset.columns.map((column) => <option key={column}>{column}</option>)}</select></div>
     <AlphaField value={alpha} onChange={setAlpha}/><button className="primary-button">{label}</button>
   </form>;
 }

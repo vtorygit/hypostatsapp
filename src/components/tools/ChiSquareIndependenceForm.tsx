@@ -27,7 +27,7 @@ export function ChiSquareIndependenceForm({
   return (
     <form className="tool-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="rowColumn">Первая категориальная переменная</label>
+        <label htmlFor="rowColumn">Первая переменная</label>
         <select
           id="rowColumn"
           value={rowColumn}
@@ -42,7 +42,7 @@ export function ChiSquareIndependenceForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="columnColumn">Вторая категориальная переменная</label>
+        <label htmlFor="columnColumn">Вторая переменная</label>
         <select
           id="columnColumn"
           value={columnColumn}

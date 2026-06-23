@@ -14,6 +14,7 @@ export function ToolPage() {
 
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [lastSettings, setLastSettings] = useState<Record<string, unknown>>({});
   const [error, setError] = useState<string | null>(null);
 
   const stage = useMemo(() => {
@@ -23,10 +24,10 @@ export function ToolPage() {
       return "settings";
     }
 
-    if (dataset) return "settings";
+    if (dataset && !foundTool?.runOnUpload) return "settings";
 
     return "upload";
-  }, [dataset, result, foundTool?.inputMode]);
+  }, [dataset, result, foundTool?.inputMode, foundTool?.runOnUpload]);
 
   if (!foundTool) {
     return (
@@ -40,14 +41,26 @@ export function ToolPage() {
   }
 
   const tool = foundTool;
+  const hasSettingsStage =
+    tool.inputMode === "calculator" ||
+    (tool.inputMode === "dataset" && !tool.runOnUpload);
+  const stageCount = tool.inputMode === "dataset" && hasSettingsStage ? 3 : 2;
 
   function handleDatasetLoaded(nextDataset: Dataset) {
     setDataset(nextDataset);
     setResult(null);
+    setLastSettings({});
     setError(null);
+
+    if (tool.inputMode === "dataset" && tool.runOnUpload) {
+      executeRun({}, nextDataset);
+    }
   }
 
-  function handleRun(settings: Record<string, unknown>) {
+  function executeRun(
+    settings: Record<string, unknown>,
+    activeDataset: Dataset | null = dataset
+  ) {
     const paid = spendTokens(tool.tokenCost);
 
     if (!paid) {
@@ -61,12 +74,12 @@ export function ToolPage() {
       if (tool.inputMode === "calculator") {
         calculation = tool.run(settings);
       } else {
-        if (!dataset) {
+        if (!activeDataset) {
           setError("Сначала загрузите данные.");
           return;
         }
 
-        calculation = tool.run(dataset, settings);
+        calculation = tool.run(activeDataset, settings);
       }
 
       setResult({
@@ -74,12 +87,13 @@ export function ToolPage() {
         metadata: {
           title: tool.title,
           description: tool.description,
-          source: dataset?.fileName ?? "Параметры, введённые пользователем",
+          source: activeDataset?.fileName ?? "Параметры, введённые пользователем",
           createdAt: new Date().toISOString(),
           toolId: tool.id,
           toolTitle: tool.title
         }
       });
+      setLastSettings(settings);
       setError(null);
     } catch (runError) {
       setError(
@@ -90,9 +104,14 @@ export function ToolPage() {
     }
   }
 
+  function handleRun(settings: Record<string, unknown>) {
+    executeRun(settings);
+  }
+
   function handleStartAgain() {
     setDataset(null);
     setResult(null);
+    setLastSettings({});
     setError(null);
   }
 
@@ -104,19 +123,21 @@ export function ToolPage() {
         <p>{tool.description}</p>
       </div>
 
-      <div className="stage-panel">
+      <div className={`stage-panel stage-panel--${stageCount}`}>
         {tool.inputMode === "dataset" && (
           <div className={`stage-step ${stage === "upload" ? "active" : ""}`}>
             1. Загрузка данных
           </div>
         )}
 
-        <div className={`stage-step ${stage === "settings" ? "active" : ""}`}>
-          {tool.inputMode === "dataset" ? "2. Настройка" : "1. Настройка"}
-        </div>
+        {hasSettingsStage && (
+          <div className={`stage-step ${stage === "settings" ? "active" : ""}`}>
+            {tool.inputMode === "dataset" ? "2. Настройка" : "1. Настройка"}
+          </div>
+        )}
 
         <div className={`stage-step ${stage === "result" ? "active" : ""}`}>
-          {tool.inputMode === "dataset" ? "3. Результат" : "2. Результат"}
+          {stageCount}. Результат
         </div>
       </div>
 
@@ -135,14 +156,16 @@ export function ToolPage() {
       )}
 
       {stage === "settings" && tool.inputMode === "dataset" && dataset && (
-        <div className="two-column-layout">
-          <div className="content-card">
-            <h2>Проверка файла</h2>
-            <DataPreview dataset={dataset} />
-          </div>
+        <div className={tool.settingsLayout === "full" ? "single-column-layout" : "two-column-layout"}>
+          {tool.showDatasetPreview !== false && (
+            <div className="content-card">
+              <h2>Проверка файла</h2>
+              <DataPreview dataset={dataset} rowsOnly />
+            </div>
+          )}
 
           <div className="content-card">
-            <h2>Настройка анализа</h2>
+            <h2>{tool.settingsTitle ?? "Настройка анализа"}</h2>
 
             <tool.formComponent dataset={dataset} onRun={handleRun} />
           </div>
@@ -157,12 +180,20 @@ export function ToolPage() {
         </div>
       )}
 
-      {stage === "result" && result && (
+      {stage === "result" && result && tool.resultComponent && (
+        <tool.resultComponent
+          result={result}
+          dataset={dataset}
+          settings={lastSettings}
+        />
+      )}
+
+      {stage === "result" && result && !tool.resultComponent && (
         <div className="content-card">
           <div className="result-header">
             <div>
               <h2>Результат</h2>
-              <p>Каждый элемент можно скопировать или скачать отдельно.</p>
+              <p>{tool.resultHint ?? "Каждый элемент можно скопировать или скачать отдельно."}</p>
             </div>
 
             <button className="secondary-button" onClick={handleStartAgain}>

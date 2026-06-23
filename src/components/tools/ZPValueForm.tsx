@@ -51,7 +51,7 @@ export function ZPValueForm({ onRun }: ZPValueFormProps) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="alternative">Альтернативная гипотеза</label>
+        <label htmlFor="alternative">Гипотеза</label>
         <select
           id="alternative"
           value={alternative}

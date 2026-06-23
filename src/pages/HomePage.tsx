@@ -3,7 +3,25 @@ import { toolGroups } from "../tools/groups";
 import { getToolsByGroup } from "../tools/registry";
 import { Card } from "../components/ui/Card";
 import { ToolPreview } from "../components/home/ToolPreview";
-import { TokenBadge } from "../components/tokens/TokenBadge";
+
+function getToolCountLabel(count: number): string {
+  const lastTwoDigits = count % 100;
+  const lastDigit = count % 10;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return `${count} инструментов`;
+  }
+
+  if (lastDigit === 1) {
+    return `${count} инструмент`;
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return `${count} инструмента`;
+  }
+
+  return `${count} инструментов`;
+}
 
 export function HomePage() {
   return (
@@ -27,10 +45,10 @@ export function HomePage() {
           <div className="hero-footer">
             <div className="hero-facts">
               <span>CSV / XLSX</span>
-              <span>Вычисления в браузере</span>
-              <span>Данные не загружаются</span>
+              <span>Privacy by design.</span>
+              <span>Файлы остаются на вашем устройстве.</span>
+              <span>Сервер не участвует в анализе.</span>
             </div>
-            <TokenBadge />
           </div>
         </Card>
 
@@ -47,25 +65,17 @@ export function HomePage() {
             >
               <div className="tool-card-topline">
                 <span>0{index + 2}</span>
-                <span>{count} {count === 1 ? "инструмент" : "инструментов"}</span>
+                <span>{getToolCountLabel(count)}</span>
               </div>
               <ToolPreview groupId={group.id} />
               <div className="tool-card-copy">
                 <h2>{group.title}</h2>
                 <p>{group.description}</p>
               </div>
-              <span className="tool-card-arrow" aria-hidden="true">↗</span>
+              <span className="tool-card-arrow" aria-hidden="true">→</span>
             </Card>
           );
         })}
-
-        <Card className="bento-note">
-          <span className="status-dot" />
-          <div>
-            <strong>Privacy by design</strong>
-            <p>Файлы остаются на вашем устройстве. Сервер не участвует в анализе.</p>
-          </div>
-        </Card>
       </div>
     </section>
   );

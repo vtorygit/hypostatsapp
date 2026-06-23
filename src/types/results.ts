@@ -7,30 +7,40 @@ export type ResultMetadata = {
   toolTitle: string;
 };
 
+export type ResultBlockAction =
+  | "copy"
+  | "downloadCsv"
+  | "downloadXlsx"
+  | "downloadPng"
+  | "addToReport";
+
+type ResultBlockBase = {
+  title: string;
+  actions?: ResultBlockAction[];
+};
+
 export type ResultBlock =
-  | {
+  | (ResultBlockBase & {
       type: "text";
-      title: string;
       content: string;
-    }
-  | {
+    })
+  | (ResultBlockBase & {
       type: "formula";
-      title: string;
       content: string;
-    }
-  | {
+    })
+  | (ResultBlockBase & {
       type: "table";
-      title: string;
       columns: string[];
       rows: Array<Record<string, string | number>>;
-    }
-  | {
+      exportRows?: Array<Record<string, string | number>>;
+      downloadFileName?: string;
+    })
+  | (ResultBlockBase & {
       type: "image";
-      title: string;
       src: string;
       alt: string;
       fileName?: string;
-    };
+    });
 
 export type CalculationResult = {
   blocks: ResultBlock[];

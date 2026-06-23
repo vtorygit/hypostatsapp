@@ -1,5 +1,10 @@
 import type { AnalysisResult } from "../../types/results";
-import { downloadCsv, copyText, downloadImage } from "../../lib/exports";
+import {
+  downloadCsv,
+  downloadXlsx,
+  copyText,
+  downloadImage
+} from "../../lib/exports";
 
 type ResultBlocksProps = {
   result: AnalysisResult;
@@ -27,25 +32,42 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
 
       {blocks.map((block, index) => {
         if (block.type === "table") {
+          const actions = block.actions ?? ["downloadCsv", "addToReport"];
+          const exportRows = block.exportRows ?? block.rows;
+          const baseFileName =
+            block.downloadFileName ?? block.title.replaceAll(" ", "_");
+
           return (
             <div key={index} className="result-block">
               <div className="result-block-header">
                 <h3>{block.title}</h3>
-                <button
-                  className="small-button"
-                  onClick={() =>
-                    downloadCsv(
-                      block.rows,
-                      block.columns,
-                      `${block.title.replaceAll(" ", "_")}.csv`
-                    )
-                  }
-                >
-                  Скачать CSV
-                </button>
-                <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                  В отчёт
-                </button>
+                <div className="result-actions">
+                  {actions.includes("downloadCsv") && (
+                    <button
+                      className="small-button"
+                      onClick={() =>
+                        downloadCsv(exportRows, block.columns, `${baseFileName}.csv`)
+                      }
+                    >
+                      Скачать CSV
+                    </button>
+                  )}
+                  {actions.includes("downloadXlsx") && (
+                    <button
+                      className="small-button"
+                      onClick={() =>
+                        downloadXlsx(exportRows, block.columns, `${baseFileName}.xlsx`)
+                      }
+                    >
+                      Скачать XLSX
+                    </button>
+                  )}
+                  {actions.includes("addToReport") && (
+                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                      В отчёт
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="table-scroll">
@@ -74,20 +96,26 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
         }
 
         if (block.type === "image") {
+          const actions = block.actions ?? ["downloadPng", "addToReport"];
+
           return (
             <div key={index} className="result-block">
               <div className="result-block-header">
                 <h3>{block.title}</h3>
                 <div className="result-actions">
-                  <button
-                    className="small-button"
-                    onClick={() => void downloadImage(block.src, block.fileName ?? "result.png")}
-                  >
-                    Скачать PNG
-                  </button>
-                  <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                    В отчёт
-                  </button>
+                  {actions.includes("downloadPng") && (
+                    <button
+                      className="small-button"
+                      onClick={() => void downloadImage(block.src, block.fileName ?? "result.png")}
+                    >
+                      Скачать PNG
+                    </button>
+                  )}
+                  {actions.includes("addToReport") && (
+                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                      В отчёт
+                    </button>
+                  )}
                 </div>
               </div>
               <img className="result-image" src={block.src} alt={block.alt} />
@@ -96,19 +124,24 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
         }
 
         if (block.type === "formula") {
+          const actions = block.actions ?? ["copy", "addToReport"];
+
           return (
             <div key={index} className="result-block">
               <div className="result-block-header">
                 <h3>{block.title}</h3>
-                <button
-                  className="small-button"
-                  onClick={() => copyText(block.content)}
-                >
-                  Скопировать
-                </button>
-                <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                  В отчёт
-                </button>
+                <div className="result-actions">
+                  {actions.includes("copy") && (
+                    <button className="small-button" onClick={() => copyText(block.content)}>
+                      Скопировать
+                    </button>
+                  )}
+                  {actions.includes("addToReport") && (
+                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                      В отчёт
+                    </button>
+                  )}
+                </div>
               </div>
 
               <pre className="formula-box">{block.content}</pre>
@@ -116,19 +149,24 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
           );
         }
 
+        const actions = block.actions ?? ["copy", "addToReport"];
+
         return (
           <div key={index} className="result-block">
             <div className="result-block-header">
               <h3>{block.title}</h3>
-              <button
-                className="small-button"
-                onClick={() => copyText(block.content)}
-              >
-                Скопировать
-              </button>
-              <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                В отчёт
-              </button>
+              <div className="result-actions">
+                {actions.includes("copy") && (
+                  <button className="small-button" onClick={() => copyText(block.content)}>
+                    Скопировать
+                  </button>
+                )}
+                {actions.includes("addToReport") && (
+                  <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
+                    В отчёт
+                  </button>
+                )}
+              </div>
             </div>
 
             <p>{block.content}</p>

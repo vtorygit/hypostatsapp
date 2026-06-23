@@ -1,5 +1,23 @@
+import * as XLSX from "xlsx";
+
 export function copyText(text: string): void {
   navigator.clipboard.writeText(text);
+}
+
+export function downloadXlsx(
+  rows: Array<Record<string, string | number>>,
+  columns: string[],
+  fileName: string
+): void {
+  const worksheet = XLSX.utils.json_to_sheet(rows, { header: columns });
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Результат");
+  const content = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([content], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+
+  downloadBlob(blob, fileName);
 }
 
 export function downloadCsv(

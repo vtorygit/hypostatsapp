@@ -10,7 +10,7 @@ export const toolGroups: ToolGroup[] = [
   {
     id: "data-preparation",
     title: "Подготовка данных",
-    description: "Просмотр данных, пропуски, дубликаты и перекодирование категорий."
+    description: "Просмотр данных, пропуски и перекодирование категорий."
   },
   {
     id: "hypothesis-testing",
@@ -25,7 +25,7 @@ export const toolGroups: ToolGroup[] = [
   {
     id: "regression",
     title: "Регрессия",
-    description: "Линейная регрессия и базовая диагностика модели."
+    description: "Линейная регрессия с одним или несколькими предикторами и диагностикой модели."
   },
   {
     id: "calculators",

@@ -2,14 +2,15 @@ import type { Dataset } from "../../types/dataset";
 
 type DataPreviewProps = {
   dataset: Dataset;
+  rowsOnly?: boolean;
 };
 
-export function DataPreview({ dataset }: DataPreviewProps) {
+export function DataPreview({ dataset, rowsOnly = false }: DataPreviewProps) {
   const previewRows = dataset.rows.slice(0, 10);
 
   return (
     <div className="data-preview">
-      <div className="dataset-meta">
+      {!rowsOnly && <div className="dataset-meta">
         <div>
           <span>Файл</span>
           <strong>{dataset.fileName}</strong>
@@ -24,16 +25,16 @@ export function DataPreview({ dataset }: DataPreviewProps) {
           <span>Столбцы</span>
           <strong>{dataset.columnCount}</strong>
         </div>
-      </div>
+      </div>}
 
-      <div className="columns-box">
+      {!rowsOnly && <div className="columns-box">
         <h3>Столбцы</h3>
         <div className="columns-list">
           {dataset.columns.map((column) => (
             <span key={column}>{column}</span>
           ))}
         </div>
-      </div>
+      </div>}
 
       <h3>Первые 10 строк</h3>
 

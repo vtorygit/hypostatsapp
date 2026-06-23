@@ -28,7 +28,7 @@ export function OneSampleTTestForm({ dataset, onRun }: OneSampleTTestFormProps) 
   return (
     <form className="tool-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="column">Числовой столбец</label>
+        <label htmlFor="column">Числовая переменная</label>
         <select
           id="column"
           value={column}
@@ -70,7 +70,7 @@ export function OneSampleTTestForm({ dataset, onRun }: OneSampleTTestFormProps) 
       </div>
 
       <div className="form-group">
-        <label htmlFor="alternative">Альтернативная гипотеза</label>
+        <label htmlFor="alternative">Гипотеза</label>
         <select
           id="alternative"
           value={alternative}
