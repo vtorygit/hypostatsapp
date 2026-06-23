@@ -10,11 +10,15 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <Link to="/" className="app-logo">
-          Research Toolbox
+        <Link to="/" className="app-logo" aria-label="Research Toolbox — главная">
+          <span className="app-mark">RT</span>
+          <span>Research Toolbox</span>
         </Link>
 
-        <TokenBadge />
+        <div className="header-meta">
+          <span className="privacy-label">Local only</span>
+          <TokenBadge compact />
+        </div>
       </header>
 
       <main className="app-main">{children}</main>

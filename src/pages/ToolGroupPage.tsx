@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { getToolGroupById } from "../tools/groups";
 import { getToolsByGroup } from "../tools/registry";
+import { Card } from "../components/ui/Card";
 
 export function ToolGroupPage() {
   const { groupId } = useParams();
@@ -34,11 +35,17 @@ export function ToolGroupPage() {
       ) : (
         <div className="card-grid">
           {tools.map((tool) => (
-            <Link key={tool.id} to={`/tools/${tool.id}`} className="tool-card">
+            <Card
+              key={tool.id}
+              as={Link}
+              to={`/tools/${tool.id}`}
+              variant="tool"
+              className="tool-card"
+            >
               <h2>{tool.title}</h2>
               <p>{tool.description}</p>
               <span className="card-meta">{tool.tokenCost} токенов</span>
-            </Link>
+            </Card>
           ))}
         </div>
       )}
