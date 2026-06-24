@@ -26,8 +26,9 @@ import { runDataPreview, runMissingValues, runCategoryRecode } from "./dataPrepa
 import { DataPreviewForm, MissingValuesForm, CategoryRecodeForm } from "../components/tools/DataPreparationForms";
 import { runSampleSizeMean, runConfidenceIntervalMean, runConfidenceIntervalProportion, runCohensD } from "./calculators/advancedCalculators";
 import { SampleSizeMeanForm, ConfidenceIntervalMeanForm, ConfidenceIntervalProportionForm, CohensDForm } from "../components/tools/AdvancedCalculatorForms";
-import { runCorrelationMatrix } from "./relationships/correlationMatrix";
-import { CorrelationMatrixForm } from "../components/tools/CorrelationMatrixForm";
+import { runCorrelationHeatmap, runCorrelationMatrix } from "./relationships/correlationMatrix";
+import { CorrelationHeatmapForm, CorrelationMatrixForm } from "../components/tools/CorrelationMatrixForm";
+import { CorrelationHeatmapResult } from "../components/results/CorrelationHeatmapResult";
 import { runMultipleLinearRegression } from "./regression/multipleLinearRegression";
 import { MultipleLinearRegressionForm } from "../components/tools/MultipleLinearRegressionForm";
 import { MultipleLinearRegressionResult } from "../components/results/MultipleLinearRegressionResult";
@@ -42,7 +43,8 @@ export const tools: ToolDefinition[] = [
     description: "Показывает структуру и первые 10 строк загруженного файла.", tokenCost: 1,
     inputMode: "dataset", formComponent: DataPreviewForm, run: runDataPreview,
     runOnUpload: true,
-    resultHint: "Структура и первые строки загруженного набора данных."
+    resultHint: "Структура и первые строки загруженного набора данных.",
+    resultMetadataMode: "fileOnly"
   },
   {
     id: "missing-values", title: "Пропуски в данных", groupId: "data-preparation",
@@ -51,7 +53,8 @@ export const tools: ToolDefinition[] = [
     settingsLayout: "full",
     settingsTitle: "Настройка обработки пропусков",
     showDatasetPreview: false,
-    resultHint: "Проверьте обработанные данные и скачайте полный набор."
+    resultHint: "Проверьте обработанные данные и скачайте полный набор.",
+    resultHeaderAction: "downloadData"
   },
   {
     id: "category-recode", title: "Перекодировка категорий", groupId: "data-preparation",
@@ -194,6 +197,13 @@ export const tools: ToolDefinition[] = [
     id: "correlation-matrix", title: "Корреляционная матрица", groupId: "relationships",
     description: "Строит матрицу корреляций Пирсона или Спирмена для нескольких переменных.", tokenCost: 6,
     inputMode: "dataset", formComponent: CorrelationMatrixForm, run: runCorrelationMatrix
+  },
+  {
+    id: "correlation-heatmap", title: "Тепловая диаграмма", groupId: "relationships",
+    description: "Визуализирует корреляционную матрицу числовых переменных в виде heatmap.", tokenCost: 6,
+    inputMode: "dataset", formComponent: CorrelationHeatmapForm,
+    run: runCorrelationHeatmap,
+    resultComponent: CorrelationHeatmapResult
   },
   {
     id: "multiple-linear-regression", title: "Линейная регрессия", groupId: "regression",

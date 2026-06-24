@@ -34,6 +34,8 @@ type ToolDefinitionBase = {
   resultHint?: string;
   runOnUpload?: boolean;
   resultComponent?: ComponentType<ToolResultProps>;
+  resultMetadataMode?: "default" | "fileOnly" | "hidden";
+  resultHeaderAction?: "restart" | "downloadData" | "none";
 };
 
 export type DatasetToolDefinition = ToolDefinitionBase & {

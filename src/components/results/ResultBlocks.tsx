@@ -8,14 +8,27 @@ import {
 
 type ResultBlocksProps = {
   result: AnalysisResult;
+  metadataMode?: "default" | "fileOnly" | "hidden";
 };
 
-export function ResultBlocks({ result }: ResultBlocksProps) {
+export function ResultBlocks({
+  result,
+  metadataMode = "default"
+}: ResultBlocksProps) {
   const { blocks, metadata } = result;
 
   return (
     <div className="result-blocks">
-      <div className="result-metadata">
+      {metadataMode === "fileOnly" && (
+        <div className="result-metadata result-metadata--file">
+          <div>
+            <span>Имя файла</span>
+            <strong>{metadata.source}</strong>
+          </div>
+        </div>
+      )}
+
+      {metadataMode === "default" && <div className="result-metadata">
         <div>
           <span>Инструмент</span>
           <strong>{metadata.toolTitle}</strong>
@@ -28,7 +41,7 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
           <span>Дата расчёта</span>
           <strong>{new Date(metadata.createdAt).toLocaleString("ru-RU")}</strong>
         </div>
-      </div>
+      </div>}
 
       {blocks.map((block, index) => {
         if (block.type === "table") {
@@ -36,6 +49,21 @@ export function ResultBlocks({ result }: ResultBlocksProps) {
           const exportRows = block.exportRows ?? block.rows;
           const baseFileName =
             block.downloadFileName ?? block.title.replaceAll(" ", "_");
+
+          if (block.presentation === "tags") {
+            return (
+              <div key={index} className="result-block">
+                <h3>{block.title}</h3>
+                <div className="columns-list result-tags">
+                  {block.rows.map((row, rowIndex) => (
+                    <span key={rowIndex}>
+                      {String(row[block.columns[0]] ?? "")}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div key={index} className="result-block">

@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { jStat } from "jstat";
 import type { ToolResultProps } from "../../types/tools";
 import { copyText, downloadCsv } from "../../lib/exports";
-import { round } from "../../lib/statistics";
+import { pearson, round } from "../../lib/statistics";
+import { CorrelationHeatmap } from "../charts/CorrelationHeatmap";
 import {
   calculateMultipleLinearRegression,
   type MultipleLinearRegressionModel
@@ -17,6 +18,7 @@ import {
 type DiagnosticId =
   | "linearity"
   | "correlations"
+  | "correlationHeatmap"
   | "vif"
   | "residualPlot"
   | "breuschPagan"
@@ -39,6 +41,7 @@ const DIAGNOSTIC_GROUPS: Array<{
     description: "Проверка взаимосвязей между предикторами. При одном предикторе VIF равен 1.",
     options: [
       { id: "correlations", label: "Парные корреляции" },
+      { id: "correlationHeatmap", label: "Корреляционная матрица — heatmap" },
       { id: "vif", label: "VIF" }
     ]
   },
@@ -110,7 +113,7 @@ function QqPlot({ values }: { values: number[] }) {
 }
 
 function MetricCard({ label, value }: { label: string; value: number }) {
-  return <div className="regression-metric"><span>{label}</span><strong>{round(value, 4)}</strong></div>;
+  return <div className="regression-metric"><span>{label}</span><strong>{Number.isFinite(value) ? value.toFixed(2) : "—"}</strong></div>;
 }
 
 function texName(name: string) {
@@ -136,12 +139,34 @@ export function MultipleLinearRegressionResult({ result, dataset, settings }: To
   const shapiro = calculateShapiroWilkApproximation(residuals);
   const correlations = calculatePairwisePredictorCorrelations(model);
   const vif = calculateVif(model);
+  const predictorHeatmap = model.predictorColumns.map((_, rowIndex) =>
+    model.predictorColumns.map((__, columnIndex) =>
+      pearson(
+        model.designRows.map((row) => row[rowIndex + 1]),
+        model.designRows.map((row) => row[columnIndex + 1])
+      )
+    )
+  );
+  const categoricalEncodings = model.features.filter(
+    (feature, index, all) =>
+      feature.kind === "categorical" &&
+      all.findIndex((item) => item.sourceColumn === feature.sourceColumn) === index
+  );
   const toggle = (id: DiagnosticId) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
 
   return <div className="regression-report">
     <div className="regression-overview">
       <div className="content-card regression-coefficients">
         <h2>Коэффициенты</h2>
+        {categoricalEncodings.length > 0 && (
+          <div className="regression-encoding-note">
+            {categoricalEncodings.map((feature) => (
+              <span key={feature.sourceColumn}>
+                {feature.sourceColumn}: базовая категория — {feature.baseline}
+              </span>
+            ))}
+          </div>
+        )}
         {coefficientBlock?.type === "table" && <div className="table-scroll"><table><thead><tr>{coefficientBlock.columns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{coefficientBlock.rows.map((row, index) => <tr key={index}>{coefficientBlock.columns.map((column) => <td key={column}>{String(row[column] ?? "")}</td>)}</tr>)}</tbody></table></div>}
       </div>
       <div className="regression-metrics"><MetricCard label="R²" value={model.rSquared}/><MetricCard label="MSE" value={model.mse}/><MetricCard label="AIC" value={model.aic}/><MetricCard label="BIC" value={model.bic}/></div>
@@ -158,6 +183,7 @@ export function MultipleLinearRegressionResult({ result, dataset, settings }: To
     {completed.length > 0 && <div className="diagnostic-results">
       {completed.includes("linearity") && <div className="content-card"><h3>Линейность</h3><ScatterChart points={model.observations.map((item) => ({ x: item.predicted, y: item.actual }))} xLabel="Предсказанные значения" yLabel="Фактические значения" diagonal/><p>Чем ближе точки к диагонали, тем лучше линейная модель воспроизводит наблюдаемые значения.</p></div>}
       {completed.includes("correlations") && <div className="content-card"><h3>Парные корреляции предикторов</h3>{correlations.length === 0 ? <p>В модели один предиктор: парные корреляции между предикторами отсутствуют.</p> : <div className="table-scroll"><table><thead><tr><th>Предиктор 1</th><th>Предиктор 2</th><th>r</th></tr></thead><tbody>{correlations.map((item) => <tr key={`${item.first}-${item.second}`}><td>{item.first}</td><td>{item.second}</td><td>{round(item.correlation, 4)}</td></tr>)}</tbody></table></div>}</div>}
+      {completed.includes("correlationHeatmap") && <div className="content-card diagnostic-result-wide"><h3>Корреляционная матрица предикторов</h3><CorrelationHeatmap labels={model.predictorColumns} matrix={predictorHeatmap}/></div>}
       {completed.includes("vif") && <div className="content-card"><h3>VIF</h3><div className="table-scroll"><table><thead><tr><th>Предиктор</th><th>VIF</th><th>Интерпретация</th></tr></thead><tbody>{vif.map((item) => <tr key={item.name}><td>{item.name}</td><td>{Number.isFinite(item.vif) ? round(item.vif, 4) : "∞"}</td><td>{item.vif < 5 ? "Проблем обычно нет" : item.vif <= 10 ? "Стоит обратить внимание" : "Выраженная мультиколлинеарность"}</td></tr>)}</tbody></table></div></div>}
       {completed.includes("residualPlot") && <div className="content-card"><h3>График остатков</h3><ScatterChart points={model.observations.map((item) => ({ x: item.predicted, y: item.residual }))} xLabel="Предсказанные значения" yLabel="Остатки"/><p>Равномерное облако вокруг нуля поддерживает предпосылку гомоскедастичности; форма воронки указывает на возможное нарушение.</p></div>}
       {completed.includes("breuschPagan") && <div className="content-card"><h3>Тест Бройша–Пагана</h3><p>LM = {round(bp.statistic, 4)}, df = {bp.df}, p-value = {round(bp.pValue, 6)}.</p><p>{bp.pValue > 0.05 ? "Оснований считать гомоскедастичность нарушенной нет." : "Есть признаки гетероскедастичности."}</p></div>}

@@ -7,6 +7,7 @@ import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
 import { ResultBlocks } from "../components/results/ResultBlocks";
 import { spendTokens } from "../lib/storage";
+import { downloadXlsx } from "../lib/exports";
 
 export function ToolPage() {
   const { toolId } = useParams();
@@ -115,6 +116,19 @@ export function ToolPage() {
     setError(null);
   }
 
+  function handleDownloadResult() {
+    if (!result) return;
+    const table = result.blocks.find(
+      (block) => block.type === "table" && (block.exportRows?.length ?? 0) > 0
+    );
+    if (!table || table.type !== "table") return;
+    downloadXlsx(
+      table.exportRows ?? table.rows,
+      table.columns,
+      `${table.downloadFileName ?? "обработанные_данные"}.xlsx`
+    );
+  }
+
   return (
     <section className="page">
       <div className="page-heading">
@@ -196,12 +210,22 @@ export function ToolPage() {
               <p>{tool.resultHint ?? "Каждый элемент можно скопировать или скачать отдельно."}</p>
             </div>
 
-            <button className="secondary-button" onClick={handleStartAgain}>
-              Новый расчёт
-            </button>
+            {(tool.resultHeaderAction ?? "restart") === "restart" && (
+              <button className="secondary-button" onClick={handleStartAgain}>
+                Новый расчёт
+              </button>
+            )}
+            {tool.resultHeaderAction === "downloadData" && (
+              <button className="primary-button" onClick={handleDownloadResult}>
+                Скачать данные
+              </button>
+            )}
           </div>
 
-          <ResultBlocks result={result} />
+          <ResultBlocks
+            result={result}
+            metadataMode={tool.resultMetadataMode}
+          />
         </div>
       )}
     </section>

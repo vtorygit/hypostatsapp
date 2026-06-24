@@ -2,9 +2,23 @@ import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
 import { round } from "../../lib/statistics";
+import {
+  getColumnCategories,
+  inferColumnKind,
+  isMissingValue,
+  type ColumnKind
+} from "../../lib/columnTypes";
+
+export type RegressionFeature = {
+  name: string;
+  sourceColumn: string;
+  kind: ColumnKind;
+  category?: string;
+  baseline?: string;
+};
 
 export type RegressionObservation = {
-  predictors: Record<string, number>;
+  sourceValues: Record<string, string | number>;
   actual: number;
   predicted: number;
   residual: number;
@@ -12,6 +26,8 @@ export type RegressionObservation = {
 
 export type MultipleLinearRegressionModel = {
   predictorColumns: string[];
+  selectedPredictorColumns: string[];
+  features: RegressionFeature[];
   yColumn: string;
   n: number;
   rSquared: number;
@@ -118,19 +134,56 @@ export function calculateMultipleLinearRegression(
     throw new Error("Зависимая переменная не может одновременно быть предиктором.");
   }
 
+  if (inferColumnKind(dataset, yColumn) !== "numeric") {
+    throw new Error("Зависимая переменная должна быть числовой.");
+  }
+
+  const predictorKinds = Object.fromEntries(
+    predictorColumns.map((column) => [column, inferColumnKind(dataset, column)])
+  ) as Record<string, ColumnKind>;
+  const features = predictorColumns.reduce<RegressionFeature[]>((all, column) => {
+    const kind = predictorKinds[column];
+    if (kind === "numeric") {
+      all.push({ name: column, sourceColumn: column, kind });
+      return all;
+    }
+    const categories = getColumnCategories(dataset, column);
+    if (categories.length < 2) {
+      throw new Error(`Категориальная переменная «${column}» должна содержать минимум две категории.`);
+    }
+    const baseline = categories[0];
+    all.push(...categories.slice(1).map((category) => ({
+      name: `${column}: ${category}`,
+      sourceColumn: column,
+      kind,
+      category,
+      baseline
+    })));
+    return all;
+  }, []);
+
   const completeRows = dataset.rows.filter((row) =>
-    [yColumn, ...predictorColumns].every(
-      (column) => typeof row[column] === "number" && Number.isFinite(row[column])
-    )
+    typeof row[yColumn] === "number" &&
+    Number.isFinite(row[yColumn]) &&
+    predictorColumns.every((column) => {
+      const value = row[column];
+      return predictorKinds[column] === "numeric"
+        ? typeof value === "number" && Number.isFinite(value)
+        : !isMissingValue(value);
+    })
   );
-  const parameterCount = predictorColumns.length + 1;
+  const parameterCount = features.length + 1;
   if (completeRows.length <= parameterCount) {
     throw new Error(`Для модели нужно больше ${parameterCount} полных наблюдений.`);
   }
 
   const designRows = completeRows.map((row) => [
     1,
-    ...predictorColumns.map((column) => row[column] as number)
+    ...features.map((feature) =>
+      feature.kind === "numeric"
+        ? row[feature.sourceColumn] as number
+        : String(row[feature.sourceColumn]) === feature.category ? 1 : 0
+    )
   ]);
   const target = completeRows.map((row) => row[yColumn] as number);
   const { coefficients: estimates, inverse } = fitCoefficients(designRows, target);
@@ -140,8 +193,8 @@ export function calculateMultipleLinearRegression(
       0
     );
     return {
-      predictors: Object.fromEntries(
-        predictorColumns.map((column) => [column, row[column] as number])
+      sourceValues: Object.fromEntries(
+        predictorColumns.map((column) => [column, row[column] as string | number])
       ),
       actual: target[index],
       predicted,
@@ -158,7 +211,7 @@ export function calculateMultipleLinearRegression(
   const mse = rss / df;
   const rSquared = 1 - rss / tss;
   const tCritical = jStat.studentt.inv(0.975, df);
-  const names = ["Константа", ...predictorColumns];
+  const names = ["Константа", ...features.map((feature) => feature.name)];
   const coefficients = estimates.map((estimate, index) => {
     const standardError = Math.sqrt(Math.max(0, mse * inverse[index][index]));
     const tStatistic = standardError === 0
@@ -181,7 +234,9 @@ export function calculateMultipleLinearRegression(
   const bic = -2 * logLikelihood + parameterCount * Math.log(n);
 
   return {
-    predictorColumns,
+    predictorColumns: features.map((feature) => feature.name),
+    selectedPredictorColumns: predictorColumns,
+    features,
     yColumn,
     n,
     rSquared,
@@ -218,9 +273,13 @@ export function runMultipleLinearRegression(
   const intervalsExcludeZero = model.coefficients.every(
     (item) => item.lower > 0 || item.upper < 0
   );
-  const coefficientInterpretations = model.coefficients.slice(1).map((item) =>
-    `Коэффициент для «${item.name}» составил ${round(item.estimate, 4)}: при росте предиктора на 1 единицу значение «${model.yColumn}» при прочих равных ${item.estimate >= 0 ? "вырастет" : "снизится"} на ${round(Math.abs(item.estimate), 2)} единицы.`
-  );
+  const coefficientInterpretations = model.coefficients.slice(1).map((item, index) => {
+    const feature = model.features[index];
+    if (feature.kind === "categorical") {
+      return `Коэффициент для категории «${feature.category}» переменной «${feature.sourceColumn}» составил ${round(item.estimate, 4)}: по сравнению с базовой категорией «${feature.baseline}» значение «${model.yColumn}» при прочих равных ${item.estimate >= 0 ? "выше" : "ниже"} на ${round(Math.abs(item.estimate), 2)} единицы.`;
+    }
+    return `Коэффициент для «${item.name}» составил ${round(item.estimate, 4)}: при росте предиктора на 1 единицу значение «${model.yColumn}» при прочих равных ${item.estimate >= 0 ? "вырастет" : "снизится"} на ${round(Math.abs(item.estimate), 2)} единицы.`;
+  });
   const narrative = [
     `R² составил ${round(model.rSquared, 4)}, то есть ${(model.rSquared * 100).toFixed(1)}% вариации зависимой переменной «${model.yColumn}» объясняют включённые в модель предикторы.`,
     `Коэффициенты модели ${significant ? "статистически значимы" : "не все статистически значимы"}. Доверительные интервалы ${intervalsExcludeZero ? "не пересекают" : "пересекают"} ноль.`,
@@ -228,7 +287,7 @@ export function runMultipleLinearRegression(
     ...coefficientInterpretations
   ].join("\n\n");
   const predictionRows = model.observations.map((item) => ({
-    ...item.predictors,
+    ...item.sourceValues,
     [model.yColumn]: item.actual,
     Прогноз: round(item.predicted, 6),
     Остаток: round(item.residual, 6)
@@ -258,7 +317,7 @@ export function runMultipleLinearRegression(
     { type: "formula", title: "Формула модели", content: formula, actions: [] },
     {
       type: "table", title: "Прогнозы и остатки",
-      columns: [...model.predictorColumns, model.yColumn, "Прогноз", "Остаток"],
+      columns: [...model.selectedPredictorColumns, model.yColumn, "Прогноз", "Остаток"],
       rows: predictionRows.slice(0, 20), exportRows: predictionRows,
       downloadFileName: `${dataset.fileName.replace(/\.[^.]+$/, "")}_прогнозы_и_остатки`,
       actions: ["downloadCsv"]

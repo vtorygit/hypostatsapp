@@ -22,13 +22,9 @@ export function runDataPreview(dataset: Dataset): CalculationResult {
     {
       type: "table",
       title: "Структура данных",
-      columns: ["Показатель", "Значение"],
-      rows: [
-        { Показатель: "Файл", Значение: dataset.fileName },
-        { Показатель: "Строки", Значение: dataset.rowCount },
-        { Показатель: "Столбцы", Значение: dataset.columnCount },
-        { Показатель: "Названия столбцов", Значение: dataset.columns.join(", ") }
-      ],
+      columns: ["Столбец"],
+      rows: dataset.columns.map((column) => ({ Столбец: column })),
+      presentation: "tags",
       actions: []
     },
     {
@@ -161,7 +157,7 @@ export function runMissingValues(
       rows: exportRows.slice(0, 10),
       exportRows,
       downloadFileName,
-      actions: ["downloadCsv", "downloadXlsx"]
+      actions: ["downloadCsv"]
     }
   ]);
 }

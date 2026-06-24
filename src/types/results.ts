@@ -34,6 +34,7 @@ export type ResultBlock =
       rows: Array<Record<string, string | number>>;
       exportRows?: Array<Record<string, string | number>>;
       downloadFileName?: string;
+      presentation?: "table" | "tags";
     })
   | (ResultBlockBase & {
       type: "image";

@@ -38,6 +38,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--canvas);
   color: var(--text);
 }
@@ -96,6 +98,8 @@ p {
 
 .app-shell {
   min-height: 100vh;
+  max-width: 100%;
+  overflow: hidden;
   padding: 10px;
   background: var(--canvas);
 }
@@ -166,6 +170,8 @@ p {
 }
 
 .app-main {
+  min-width: 0;
+  max-width: 100%;
   margin-top: 10px;
   padding: clamp(24px, 4vw, 56px);
   min-height: calc(100vh - 88px);
@@ -175,6 +181,7 @@ p {
 
 .page {
   width: min(1280px, 100%);
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -229,6 +236,8 @@ p {
 
 .content-card,
 .empty-state {
+  min-width: 0;
+  max-width: 100%;
   padding: clamp(22px, 3vw, 34px);
 }
 
@@ -713,6 +722,12 @@ p {
   align-items: start;
 }
 
+.two-column-layout > *,
+.single-column-layout > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .dataset-meta,
 .result-metadata {
   display: grid;
@@ -750,6 +765,21 @@ p {
   text-overflow: ellipsis;
 }
 
+.result-metadata--file {
+  grid-template-columns: 1fr;
+}
+
+.result-metadata--file strong {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.result-tags span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .columns-box {
   margin-bottom: 24px;
 }
@@ -769,7 +799,9 @@ p {
 }
 
 .table-scroll {
+  display: block;
   overflow: auto;
+  width: 100%;
   max-width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -777,6 +809,7 @@ p {
 
 table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
   background: var(--surface);
 }
@@ -895,10 +928,14 @@ td {
 
 .result-blocks {
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   gap: 8px;
 }
 
 .result-block {
+  min-width: 0;
+  max-width: 100%;
   padding: 22px;
 }
 
@@ -932,7 +969,7 @@ td {
 
 .regression-overview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
   gap: 8px;
   align-items: stretch;
 }
@@ -943,16 +980,16 @@ td {
 
 .regression-metrics {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
 .regression-metric {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
-  min-height: 145px;
-  padding: 22px;
+  align-items: center;
+  min-height: 76px;
+  padding: 16px 20px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -961,14 +998,31 @@ td {
 .regression-metric span {
   color: var(--muted);
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 10px;
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: 0.06em;
 }
 
 .regression-metric strong {
-  font-size: clamp(28px, 4vw, 48px);
+  font-size: clamp(26px, 3vw, 38px);
   font-weight: 500;
   letter-spacing: -0.06em;
+}
+
+.regression-encoding-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.regression-encoding-note span {
+  padding: 6px 9px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
 }
 
 .regression-narrative p {
@@ -1086,6 +1140,88 @@ td {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
+}
+
+.diagnostic-result-wide {
+  grid-column: 1 / -1;
+}
+
+/* Correlation heatmap */
+.heatmap-wrapper {
+  overflow-x: auto;
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.heatmap-grid {
+  display: grid;
+  min-width: max-content;
+  background: var(--line);
+  gap: 1px;
+}
+
+.heatmap-row {
+  display: contents;
+}
+
+.heatmap-corner,
+.heatmap-column-label,
+.heatmap-row-label,
+.heatmap-cell {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 12px;
+}
+
+.heatmap-corner,
+.heatmap-column-label,
+.heatmap-row-label {
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+}
+
+.heatmap-column-label {
+  justify-content: center;
+  text-align: center;
+}
+
+.heatmap-row-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.heatmap-cell {
+  justify-content: center;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.heatmap-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  color: var(--muted);
+  background: var(--surface);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+}
+
+.heatmap-legend i {
+  display: block;
+  width: 38px;
+  height: 8px;
+  background: linear-gradient(90deg, #f4f4f0, #777, #111);
+  border-radius: 999px;
 }
 
 .regression-predictors {

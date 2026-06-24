@@ -1,10 +1,14 @@
 import { useState } from "react";
 import type { DatasetToolFormProps } from "../../types/tools";
+import { inferColumnKind } from "../../lib/columnTypes";
 
 export function MultipleLinearRegressionForm({ dataset, onRun }: DatasetToolFormProps) {
-  const [yColumn, setYColumn] = useState(dataset.columns[0] ?? "");
+  const numericColumns = dataset.columns.filter(
+    (column) => inferColumnKind(dataset, column) === "numeric"
+  );
+  const [yColumn, setYColumn] = useState(numericColumns[0] ?? "");
   const [predictorColumns, setPredictorColumns] = useState(
-    dataset.columns.filter((column) => column !== (dataset.columns[0] ?? "")).slice(0, 2)
+    dataset.columns.filter((column) => column !== (numericColumns[0] ?? "")).slice(0, 2)
   );
 
   function togglePredictor(column: string) {
@@ -24,7 +28,7 @@ export function MultipleLinearRegressionForm({ dataset, onRun }: DatasetToolForm
           setYColumn(next);
           setPredictorColumns((current) => current.filter((column) => column !== next));
         }}>
-          {dataset.columns.map((column) => <option key={column}>{column}</option>)}
+          {numericColumns.map((column) => <option key={column}>{column}</option>)}
         </select>
       </div>
 
@@ -34,7 +38,7 @@ export function MultipleLinearRegressionForm({ dataset, onRun }: DatasetToolForm
           {dataset.columns.filter((column) => column !== yColumn).map((column) => (
             <label key={column}>
               <input type="checkbox" checked={predictorColumns.includes(column)} onChange={() => togglePredictor(column)} />
-              {column}
+              <span>{column} <small>({inferColumnKind(dataset, column) === "numeric" ? "числовая" : "категориальная"})</small></span>
             </label>
           ))}
         </div>
