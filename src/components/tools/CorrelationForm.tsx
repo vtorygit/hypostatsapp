@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Dataset } from "../../types/dataset";
+import { inferColumnKind } from "../../lib/columnTypes";
 
 type CorrelationFormProps = {
   dataset: Dataset;
@@ -7,8 +8,11 @@ type CorrelationFormProps = {
 };
 
 export function CorrelationForm({ dataset, onRun }: CorrelationFormProps) {
-  const [xColumn, setXColumn] = useState(dataset.columns[0] ?? "");
-  const [yColumn, setYColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
+  const numericColumns = dataset.columns.filter(
+    (column) => inferColumnKind(dataset, column) === "numeric"
+  );
+  const [xColumn, setXColumn] = useState(numericColumns[0] ?? "");
+  const [yColumn, setYColumn] = useState(numericColumns[1] ?? numericColumns[0] ?? "");
   const [alpha, setAlpha] = useState("0.05");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -30,7 +34,7 @@ export function CorrelationForm({ dataset, onRun }: CorrelationFormProps) {
           value={xColumn}
           onChange={(event) => setXColumn(event.target.value)}
         >
-          {dataset.columns.map((column) => (
+          {numericColumns.map((column) => (
             <option key={column} value={column}>
               {column}
             </option>
@@ -45,7 +49,7 @@ export function CorrelationForm({ dataset, onRun }: CorrelationFormProps) {
           value={yColumn}
           onChange={(event) => setYColumn(event.target.value)}
         >
-          {dataset.columns.map((column) => (
+          {numericColumns.map((column) => (
             <option key={column} value={column}>
               {column}
             </option>

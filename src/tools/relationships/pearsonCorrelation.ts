@@ -1,6 +1,7 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
+import { inferColumnKind } from "../../lib/columnTypes";
 
 function mean(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
@@ -13,6 +14,13 @@ export function runPearsonCorrelation(
   const xColumn = String(settings.xColumn);
   const yColumn = String(settings.yColumn);
   const alpha = Number(settings.alpha);
+
+  if (
+    inferColumnKind(dataset, xColumn) !== "numeric" ||
+    inferColumnKind(dataset, yColumn) !== "numeric"
+  ) {
+    throw new Error("Корреляция рассчитывается только для числовых переменных.");
+  }
 
   const pairs = dataset.rows
     .map((row) => ({

@@ -224,7 +224,10 @@ export function ToolPage() {
 
           <ResultBlocks
             result={result}
-            metadataMode={tool.resultMetadataMode}
+            metadataMode={
+              tool.resultMetadataMode ??
+              (tool.inputMode === "dataset" ? "fileOnly" : "hidden")
+            }
           />
         </div>
       )}

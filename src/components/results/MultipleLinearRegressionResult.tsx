@@ -139,8 +139,12 @@ export function MultipleLinearRegressionResult({ result, dataset, settings }: To
   const shapiro = calculateShapiroWilkApproximation(residuals);
   const correlations = calculatePairwisePredictorCorrelations(model);
   const vif = calculateVif(model);
-  const predictorHeatmap = model.predictorColumns.map((_, rowIndex) =>
-    model.predictorColumns.map((__, columnIndex) =>
+  const numericFeatures = model.features
+    .map((feature, index) => ({ feature, index }))
+    .filter(({ feature }) => feature.kind === "numeric");
+  const numericHeatmapLabels = numericFeatures.map(({ feature }) => feature.name);
+  const predictorHeatmap = numericFeatures.map(({ index: rowIndex }) =>
+    numericFeatures.map(({ index: columnIndex }) =>
       pearson(
         model.designRows.map((row) => row[rowIndex + 1]),
         model.designRows.map((row) => row[columnIndex + 1])
@@ -183,7 +187,7 @@ export function MultipleLinearRegressionResult({ result, dataset, settings }: To
     {completed.length > 0 && <div className="diagnostic-results">
       {completed.includes("linearity") && <div className="content-card"><h3>Линейность</h3><ScatterChart points={model.observations.map((item) => ({ x: item.predicted, y: item.actual }))} xLabel="Предсказанные значения" yLabel="Фактические значения" diagonal/><p>Чем ближе точки к диагонали, тем лучше линейная модель воспроизводит наблюдаемые значения.</p></div>}
       {completed.includes("correlations") && <div className="content-card"><h3>Парные корреляции предикторов</h3>{correlations.length === 0 ? <p>В модели один предиктор: парные корреляции между предикторами отсутствуют.</p> : <div className="table-scroll"><table><thead><tr><th>Предиктор 1</th><th>Предиктор 2</th><th>r</th></tr></thead><tbody>{correlations.map((item) => <tr key={`${item.first}-${item.second}`}><td>{item.first}</td><td>{item.second}</td><td>{round(item.correlation, 4)}</td></tr>)}</tbody></table></div>}</div>}
-      {completed.includes("correlationHeatmap") && <div className="content-card diagnostic-result-wide"><h3>Корреляционная матрица предикторов</h3><CorrelationHeatmap labels={model.predictorColumns} matrix={predictorHeatmap}/></div>}
+      {completed.includes("correlationHeatmap") && <div className="content-card diagnostic-result-wide"><h3>Корреляционная матрица числовых предикторов</h3>{numericHeatmapLabels.length === 0 ? <p>В модели нет числовых предикторов для построения корреляционной матрицы.</p> : <CorrelationHeatmap labels={numericHeatmapLabels} matrix={predictorHeatmap}/>}</div>}
       {completed.includes("vif") && <div className="content-card"><h3>VIF</h3><div className="table-scroll"><table><thead><tr><th>Предиктор</th><th>VIF</th><th>Интерпретация</th></tr></thead><tbody>{vif.map((item) => <tr key={item.name}><td>{item.name}</td><td>{Number.isFinite(item.vif) ? round(item.vif, 4) : "∞"}</td><td>{item.vif < 5 ? "Проблем обычно нет" : item.vif <= 10 ? "Стоит обратить внимание" : "Выраженная мультиколлинеарность"}</td></tr>)}</tbody></table></div></div>}
       {completed.includes("residualPlot") && <div className="content-card"><h3>График остатков</h3><ScatterChart points={model.observations.map((item) => ({ x: item.predicted, y: item.residual }))} xLabel="Предсказанные значения" yLabel="Остатки"/><p>Равномерное облако вокруг нуля поддерживает предпосылку гомоскедастичности; форма воронки указывает на возможное нарушение.</p></div>}
       {completed.includes("breuschPagan") && <div className="content-card"><h3>Тест Бройша–Пагана</h3><p>LM = {round(bp.statistic, 4)}, df = {bp.df}, p-value = {round(bp.pValue, 6)}.</p><p>{bp.pValue > 0.05 ? "Оснований считать гомоскедастичность нарушенной нет." : "Есть признаки гетероскедастичности."}</p></div>}

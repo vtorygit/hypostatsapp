@@ -1,6 +1,7 @@
 import { jStat } from "jstat";
 import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
+import { inferColumnKind } from "../../lib/columnTypes";
 
 function rank(values: number[]): number[] {
   const sorted = values
@@ -59,6 +60,13 @@ export function runSpearmanCorrelation(
 
   if (xColumn === yColumn) {
     throw new Error("Выберите две разные переменные.");
+  }
+
+  if (
+    inferColumnKind(dataset, xColumn) !== "numeric" ||
+    inferColumnKind(dataset, yColumn) !== "numeric"
+  ) {
+    throw new Error("Корреляция рассчитывается только для числовых переменных.");
   }
 
   if (Number.isNaN(alpha) || alpha <= 0 || alpha >= 1) {

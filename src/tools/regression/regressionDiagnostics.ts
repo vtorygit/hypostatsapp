@@ -63,12 +63,14 @@ export function calculatePairwisePredictorCorrelations(
   model: MultipleLinearRegressionModel
 ) {
   const rows: Array<{ first: string; second: string; correlation: number }> = [];
-  model.predictorColumns.forEach((first, firstIndex) => {
-    model.predictorColumns.slice(firstIndex + 1).forEach((second, offset) => {
-      const secondIndex = firstIndex + offset + 1;
+  const numericFeatures = model.features
+    .map((feature, index) => ({ feature, index }))
+    .filter(({ feature }) => feature.kind === "numeric");
+  numericFeatures.forEach(({ feature: first, index: firstIndex }, listIndex) => {
+    numericFeatures.slice(listIndex + 1).forEach(({ feature: second, index: secondIndex }) => {
       rows.push({
-        first,
-        second,
+        first: first.name,
+        second: second.name,
         correlation: pearson(
           model.designRows.map((row) => row[firstIndex + 1]),
           model.designRows.map((row) => row[secondIndex + 1])

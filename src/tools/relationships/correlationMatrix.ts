@@ -1,6 +1,7 @@
 import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
 import { pearson, round, spearman } from "../../lib/statistics";
+import { inferColumnKind } from "../../lib/columnTypes";
 
 export type CorrelationMethod = "pearson" | "spearman";
 
@@ -31,6 +32,9 @@ export function runCorrelationMatrix(dataset: Dataset, settings: Record<string, 
   const columns = Array.isArray(settings.columns) ? settings.columns.map(String) : [];
   const method: CorrelationMethod = settings.method === "spearman" ? "spearman" : "pearson";
   if (columns.length < 2) throw new Error("Выберите минимум два столбца.");
+  if (columns.some((column) => inferColumnKind(dataset, column) !== "numeric")) {
+    throw new Error("Корреляционная матрица строится только для числовых переменных.");
+  }
   const matrix = calculateCorrelationMatrix(dataset, columns, method);
 
   const rows = columns.map((rowColumn, rowIndex) => {
