@@ -38,6 +38,14 @@ export function runTwoProportionsZTest(
   const sampleSize2 = Number(settings.sampleSize2);
   const alpha = Number(settings.alpha);
   const alternative = settings.alternative as Alternative;
+  const firstColumn = typeof settings.firstColumn === "string" ? settings.firstColumn : "";
+  const secondColumn = typeof settings.secondColumn === "string" ? settings.secondColumn : "";
+  const firstValues = Array.isArray(settings.firstValues)
+    ? settings.firstValues.map(String)
+    : [];
+  const secondValues = Array.isArray(settings.secondValues)
+    ? settings.secondValues.map(String)
+    : [];
 
   if (
     [successes1, sampleSize1, successes2, sampleSize2, alpha].some((value) =>
@@ -96,16 +104,31 @@ export function runTwoProportionsZTest(
       title: "Результаты Z-теста для двух долей",
       columns: ["Показатель", "Значение"],
       rows: [
+        {
+          Показатель: "Переменная для доли 1",
+          Значение: firstColumn || "—"
+        },
+        {
+          Показатель: "Категории доли 1",
+          Значение: firstValues.length > 0 ? firstValues.join(", ") : "—"
+        },
         { Показатель: "Успехи в группе 1", Значение: successes1 },
         { Показатель: "Размер группы 1", Значение: sampleSize1 },
         { Показатель: "Доля в группе 1", Значение: Number(p1.toFixed(4)) },
+        {
+          Показатель: "Переменная для доли 2",
+          Значение: secondColumn || "—"
+        },
+        {
+          Показатель: "Категории доли 2",
+          Значение: secondValues.length > 0 ? secondValues.join(", ") : "—"
+        },
         { Показатель: "Успехи в группе 2", Значение: successes2 },
         { Показатель: "Размер группы 2", Значение: sampleSize2 },
         { Показатель: "Доля в группе 2", Значение: Number(p2.toFixed(4)) },
         { Показатель: "Общая доля", Значение: Number(pooledP.toFixed(4)) },
         { Показатель: "Z-статистика", Значение: Number(z.toFixed(4)) },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {
