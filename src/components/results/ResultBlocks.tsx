@@ -45,7 +45,7 @@ export function ResultBlocks({
 
       {blocks.map((block, index) => {
         if (block.type === "table") {
-          const actions = block.actions ?? ["downloadCsv", "addToReport"];
+          const actions = block.actions ?? ["downloadCsv"];
           const exportRows = block.exportRows ?? block.rows;
           const baseFileName =
             block.downloadFileName ?? block.title.replaceAll(" ", "_");
@@ -90,11 +90,6 @@ export function ResultBlocks({
                       Скачать XLSX
                     </button>
                   )}
-                  {actions.includes("addToReport") && (
-                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                      В отчёт
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -124,7 +119,7 @@ export function ResultBlocks({
         }
 
         if (block.type === "image") {
-          const actions = block.actions ?? ["downloadPng", "addToReport"];
+          const actions = block.actions ?? ["downloadPng"];
 
           return (
             <div key={index} className="result-block">
@@ -139,11 +134,6 @@ export function ResultBlocks({
                       Скачать PNG
                     </button>
                   )}
-                  {actions.includes("addToReport") && (
-                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                      В отчёт
-                    </button>
-                  )}
                 </div>
               </div>
               <img className="result-image" src={block.src} alt={block.alt} />
@@ -152,7 +142,7 @@ export function ResultBlocks({
         }
 
         if (block.type === "formula") {
-          const actions = block.actions ?? ["copy", "addToReport"];
+          const actions = block.actions ?? ["copy"];
 
           return (
             <div key={index} className="result-block">
@@ -164,11 +154,6 @@ export function ResultBlocks({
                       Скопировать
                     </button>
                   )}
-                  {actions.includes("addToReport") && (
-                    <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                      В отчёт
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -177,7 +162,7 @@ export function ResultBlocks({
           );
         }
 
-        const actions = block.actions ?? ["copy", "addToReport"];
+        const actions = block.actions ?? ["copy"];
 
         return (
           <div key={index} className="result-block">
@@ -187,11 +172,6 @@ export function ResultBlocks({
                 {actions.includes("copy") && (
                   <button className="small-button" onClick={() => copyText(block.content)}>
                     Скопировать
-                  </button>
-                )}
-                {actions.includes("addToReport") && (
-                  <button className="small-button" disabled title="Будет доступно в генераторе отчётов">
-                    В отчёт
                   </button>
                 )}
               </div>

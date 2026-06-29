@@ -922,6 +922,18 @@ td {
   outline: none;
 }
 
+.form-group .checkbox-row input[type="checkbox"] {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.form-group .checkbox-row {
+  min-height: 48px;
+}
+
 .form-group textarea {
   min-height: 96px;
   resize: vertical;
@@ -932,6 +944,85 @@ td {
 .form-group textarea:focus {
   border-color: var(--text);
   box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.two-proportions-result {
+  display: grid;
+  gap: 18px;
+}
+
+.proportion-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.proportion-result-card,
+.proportion-common-grid > div {
+  min-width: 0;
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.proportion-result-card > span,
+.proportion-common-grid span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.proportion-result-card > strong,
+.proportion-common-grid strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.proportion-result-card dl {
+  display: grid;
+  gap: 1px;
+  margin: 16px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.proportion-result-card dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.5fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+}
+
+.proportion-result-card dt,
+.proportion-result-card dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.proportion-result-card dt {
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.proportion-result-card dd {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.proportion-common-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .single-column-layout {
@@ -1386,7 +1477,9 @@ td {
   }
 
   .regression-overview,
-  .diagnostic-results {
+  .diagnostic-results,
+  .proportion-result-grid,
+  .proportion-common-grid {
     grid-template-columns: 1fr;
   }
 }

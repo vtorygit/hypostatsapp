@@ -11,8 +11,7 @@ export type ResultBlockAction =
   | "copy"
   | "downloadCsv"
   | "downloadXlsx"
-  | "downloadPng"
-  | "addToReport";
+  | "downloadPng";
 
 type ResultBlockBase = {
   title: string;

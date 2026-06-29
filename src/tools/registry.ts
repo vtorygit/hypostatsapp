@@ -13,6 +13,7 @@ import { runZCriticalValueCalculator } from "./calculators/zCriticalValue";
 import { runZPValueCalculator } from "./calculators/zPValue";
 import { OneProportionZTestForm } from "../components/tools/OneProportionZTestForm";
 import { TwoProportionsZTestForm } from "../components/tools/TwoProportionsZTestForm";
+import { TwoProportionsZTestResult } from "../components/results/TwoProportionsZTestResult";
 import { OneSampleTTestForm } from "../components/tools/OneSampleTTestForm";
 import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamplesTTestForm";
 import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
@@ -94,7 +95,8 @@ export const tools: ToolDefinition[] = [
     tokenCost: 7,
     inputMode: "dataset",
     formComponent: TwoProportionsZTestForm,
-    run: runTwoProportionsZTest
+    run: runTwoProportionsZTest,
+    resultComponent: TwoProportionsZTestResult
   },
   {
     id: "one-sample-t-test",
