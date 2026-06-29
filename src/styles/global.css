@@ -281,7 +281,7 @@ p {
 
 .hero-copy h1 {
   margin: var(--space-3) 0 var(--space-4);
-  font-size: clamp(60px, 7vw, 108px);
+  font-size: clamp(56px, 6.2vw, 92px);
 }
 
 .hero-description {
@@ -1363,7 +1363,7 @@ td {
   }
 
   .hero-copy h1 {
-    font-size: clamp(56px, 19vw, 82px);
+    font-size: clamp(48px, 17vw, 72px);
   }
 
   .hero-footer,
