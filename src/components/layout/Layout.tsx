@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
       <header className="app-header">
         <Link to="/" className="app-logo" aria-label="Research Toolbox — главная">
           <span className="app-mark">RT</span>
-          <span>Research Toolbox</span>
+          <span>Инструменты исследователя</span>
         </Link>
 
         <div className="header-meta">
