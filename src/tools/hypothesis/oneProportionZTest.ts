@@ -112,10 +112,6 @@ export function runOneProportionZTest(
         {
           Показатель: "p-value",
           Значение: Number(pValue.toFixed(6))
-        },
-        {
-          Показатель: "α",
-          Значение: alpha
         }
       ]
     },
