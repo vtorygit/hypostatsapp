@@ -7,15 +7,17 @@ type IndependentSamplesTTestFormProps = {
 };
 
 type Alternative = "two-sided" | "less" | "greater";
+type CompareMode = "columns" | "groups";
 
 export function IndependentSamplesTTestForm({
   dataset,
   onRun
 }: IndependentSamplesTTestFormProps) {
+  const [compareMode, setCompareMode] = useState<CompareMode>("groups");
+  const [firstColumn, setFirstColumn] = useState(dataset.columns[0] ?? "");
+  const [secondColumn, setSecondColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
   const [valueColumn, setValueColumn] = useState(dataset.columns[0] ?? "");
   const [groupColumn, setGroupColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
-  const [group1Value, setGroup1Value] = useState("");
-  const [group2Value, setGroup2Value] = useState("");
   const [alpha, setAlpha] = useState("0.05");
   const [alternative, setAlternative] = useState<Alternative>("two-sided");
 
@@ -29,17 +31,18 @@ export function IndependentSamplesTTestForm({
           .filter((value) => value !== null && value !== undefined && value !== "")
           .map(String)
       )
-    ).slice(0, 50);
+    );
   }, [dataset, groupColumn]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     onRun({
+      compareMode,
+      firstColumn,
+      secondColumn,
       valueColumn,
       groupColumn,
-      group1Value,
-      group2Value,
       alpha: Number(alpha),
       alternative
     });
@@ -48,72 +51,87 @@ export function IndependentSamplesTTestForm({
   return (
     <form className="tool-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="valueColumn">Числовая переменная</label>
+        <label htmlFor="compareMode">Что сравниваем</label>
         <select
-          id="valueColumn"
-          value={valueColumn}
-          onChange={(event) => setValueColumn(event.target.value)}
+          id="compareMode"
+          value={compareMode}
+          onChange={(event) => setCompareMode(event.target.value as CompareMode)}
         >
-          {dataset.columns.map((column) => (
-            <option key={column} value={column}>
-              {column}
-            </option>
-          ))}
+          <option value="groups">Одну числовую переменную по двум категориям</option>
+          <option value="columns">Две числовые переменные</option>
         </select>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="groupColumn">Группирующая переменная</label>
-        <select
-          id="groupColumn"
-          value={groupColumn}
-          onChange={(event) => {
-            setGroupColumn(event.target.value);
-            setGroup1Value("");
-            setGroup2Value("");
-          }}
-        >
-          {dataset.columns.map((column) => (
-            <option key={column} value={column}>
-              {column}
-            </option>
-          ))}
-        </select>
-      </div>
+      {compareMode === "columns" && (
+        <>
+          <div className="form-group">
+            <label htmlFor="firstColumn">Переменная 1</label>
+            <select
+              id="firstColumn"
+              value={firstColumn}
+              onChange={(event) => setFirstColumn(event.target.value)}
+            >
+              {dataset.columns.map((column) => (
+                <option key={column} value={column}>
+                  {column}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="group1Value">Первая группа</label>
-        <select
-          id="group1Value"
-          value={group1Value}
-          onChange={(event) => setGroup1Value(event.target.value)}
-          required
-        >
-          <option value="">Выберите значение</option>
-          {groupValues.map((value) => (
-            <option key={value} value={value}>
-              {value}
-            </option>
-          ))}
-        </select>
-      </div>
+          <div className="form-group">
+            <label htmlFor="secondColumn">Переменная 2</label>
+            <select
+              id="secondColumn"
+              value={secondColumn}
+              onChange={(event) => setSecondColumn(event.target.value)}
+            >
+              {dataset.columns.map((column) => (
+                <option key={column} value={column}>
+                  {column}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
 
-      <div className="form-group">
-        <label htmlFor="group2Value">Вторая группа</label>
-        <select
-          id="group2Value"
-          value={group2Value}
-          onChange={(event) => setGroup2Value(event.target.value)}
-          required
-        >
-          <option value="">Выберите значение</option>
-          {groupValues.map((value) => (
-            <option key={value} value={value}>
-              {value}
-            </option>
-          ))}
-        </select>
-      </div>
+      {compareMode === "groups" && (
+        <>
+          <div className="form-group">
+            <label htmlFor="valueColumn">Числовая переменная</label>
+            <select
+              id="valueColumn"
+              value={valueColumn}
+              onChange={(event) => setValueColumn(event.target.value)}
+            >
+              {dataset.columns.map((column) => (
+                <option key={column} value={column}>
+                  {column}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="groupColumn">Группирующая переменная</label>
+            <select
+              id="groupColumn"
+              value={groupColumn}
+              onChange={(event) => setGroupColumn(event.target.value)}
+            >
+              {dataset.columns.map((column) => (
+                <option key={column} value={column}>
+                  {column}
+                </option>
+              ))}
+            </select>
+            <p className="field-hint">
+              В расчёт попадут две категории этой переменной: {groupValues.length === 2 ? groupValues.join(" и ") : "выберите переменную с двумя категориями"}.
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="form-group">
         <label htmlFor="alpha">Уровень значимости α</label>

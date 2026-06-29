@@ -73,8 +73,7 @@ export function runOneSampleTTest(
         { Показатель: "Стандартная ошибка", Значение: Number(standardError.toFixed(4)) },
         { Показатель: "df", Значение: df },
         { Показатель: "t-статистика", Значение: Number(t.toFixed(4)) },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {

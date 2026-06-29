@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { TokenBadge } from "../tokens/TokenBadge";
 
 type LayoutProps = {
   children: ReactNode;
@@ -14,10 +13,6 @@ export function Layout({ children }: LayoutProps) {
           <span className="app-mark">RT</span>
           <span>Инструменты исследователя</span>
         </Link>
-
-        <div className="header-meta">
-          <TokenBadge compact />
-        </div>
       </header>
 
       <main className="app-main">{children}</main>

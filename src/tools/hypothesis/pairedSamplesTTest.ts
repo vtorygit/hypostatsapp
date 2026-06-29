@@ -81,16 +81,12 @@ export function runPairedSamplesTTest(
       title: "Результаты парного t-теста",
       columns: ["Показатель", "Значение"],
       rows: [
-        { Показатель: "Столбец до", Значение: beforeColumn },
-        { Показатель: "Столбец после", Значение: afterColumn },
-        { Показатель: "n пар", Значение: n },
+        { Показатель: "Сравниваемые переменные", Значение: `${beforeColumn} vs ${afterColumn}` },
         { Показатель: "Средняя разность", Значение: Number(meanDifference.toFixed(4)) },
         { Показатель: "SD разностей", Значение: Number(sdDifference.toFixed(4)) },
         { Показатель: "Стандартная ошибка", Значение: Number(standardError.toFixed(4)) },
-        { Показатель: "df", Значение: df },
         { Показатель: "t-статистика", Значение: Number(t.toFixed(4)) },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {

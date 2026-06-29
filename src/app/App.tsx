@@ -5,14 +5,13 @@ import { OnboardingPage } from "../pages/OnboardingPage";
 import { ToolGroupPage } from "../pages/ToolGroupPage";
 import { ToolPage } from "../pages/ToolPage";
 import { Layout } from "../components/layout/Layout";
-import { ensureDailyTokensReset, isOnboardingCompleted } from "../lib/storage";
+import { isOnboardingCompleted } from "../lib/storage";
 
 export default function App() {
   const [ready, setReady] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(false);
 
   useEffect(() => {
-    ensureDailyTokensReset();
     setOnboardingDone(isOnboardingCompleted());
     setReady(true);
   }, []);

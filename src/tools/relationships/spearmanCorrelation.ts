@@ -112,11 +112,8 @@ export function runSpearmanCorrelation(
       rows: [
         { Показатель: "Переменная X", Значение: xColumn },
         { Показатель: "Переменная Y", Значение: yColumn },
-        { Показатель: "n", Значение: n },
         { Показатель: "ρ", Значение: Number(rho.toFixed(4)) },
-        { Показатель: "t", Значение: Number(t.toFixed(4)) },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {

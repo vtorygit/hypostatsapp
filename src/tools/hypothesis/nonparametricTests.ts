@@ -3,6 +3,8 @@ import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
 import { averageRanks, round, twoSidedNormalPValue } from "../../lib/statistics";
 
+type CompareMode = "groups" | "columns";
+
 function alphaFrom(settings: Record<string, unknown>): number {
   const alpha = Number(settings.alpha);
   if (!(alpha > 0 && alpha < 1)) throw new Error("Уровень значимости должен быть от 0 до 1.");
@@ -14,11 +16,26 @@ function conclusion(pValue: number, alpha: number): string {
 }
 
 export function runMannWhitneyUTest(dataset: Dataset, settings: Record<string, unknown>): CalculationResult {
+  const compareMode = (settings.compareMode as CompareMode) ?? "groups";
   const valueColumn = String(settings.valueColumn ?? ""); const groupColumn = String(settings.groupColumn ?? "");
-  const group1 = String(settings.group1 ?? ""); const group2 = String(settings.group2 ?? ""); const alpha = alphaFrom(settings);
-  if (!valueColumn || !groupColumn || !group1 || !group2 || group1 === group2) throw new Error("Выберите числовую переменную и две разные группы.");
-  const values1 = dataset.rows.filter((row) => String(row[groupColumn]) === group1 && typeof row[valueColumn] === "number" && Number.isFinite(row[valueColumn])).map((row) => row[valueColumn] as number);
-  const values2 = dataset.rows.filter((row) => String(row[groupColumn]) === group2 && typeof row[valueColumn] === "number" && Number.isFinite(row[valueColumn])).map((row) => row[valueColumn] as number);
+  const firstColumn = String(settings.firstColumn ?? ""); const secondColumn = String(settings.secondColumn ?? "");
+  const alpha = alphaFrom(settings);
+  let values1: number[]; let values2: number[]; let group1: string; let group2: string;
+
+  if (compareMode === "columns") {
+    if (!firstColumn || !secondColumn || firstColumn === secondColumn) throw new Error("Выберите две разные числовые переменные.");
+    values1 = dataset.rows.filter((row) => typeof row[firstColumn] === "number" && Number.isFinite(row[firstColumn])).map((row) => row[firstColumn] as number);
+    values2 = dataset.rows.filter((row) => typeof row[secondColumn] === "number" && Number.isFinite(row[secondColumn])).map((row) => row[secondColumn] as number);
+    group1 = firstColumn; group2 = secondColumn;
+  } else {
+    if (!valueColumn || !groupColumn) throw new Error("Выберите числовую переменную и группирующую переменную.");
+    const groups = Array.from(new Set(dataset.rows.map((row) => row[groupColumn]).filter((value) => value !== null && value !== undefined && value !== "").map(String)));
+    if (groups.length !== 2) throw new Error("Для критерия Манна–Уитни выберите группирующую переменную с двумя значениями.");
+    [group1, group2] = groups;
+    values1 = dataset.rows.filter((row) => String(row[groupColumn]) === group1 && typeof row[valueColumn] === "number" && Number.isFinite(row[valueColumn])).map((row) => row[valueColumn] as number);
+    values2 = dataset.rows.filter((row) => String(row[groupColumn]) === group2 && typeof row[valueColumn] === "number" && Number.isFinite(row[valueColumn])).map((row) => row[valueColumn] as number);
+  }
+
   if (values1.length < 1 || values2.length < 1) throw new Error("В каждой группе должно быть хотя бы одно числовое наблюдение.");
   const combined = [...values1, ...values2]; const { ranks, tieTerm } = averageRanks(combined);
   const n1 = values1.length; const n2 = values2.length; const n = n1 + n2;
@@ -33,7 +50,7 @@ export function runMannWhitneyUTest(dataset: Dataset, settings: Record<string, u
     { type: "table", title: "Критерий Манна–Уитни", columns: ["Показатель", "Значение"], rows: [
       { Показатель: "Группа 1", Значение: group1 }, { Показатель: "Группа 2", Значение: group2 },
       { Показатель: "n1", Значение: n1 }, { Показатель: "n2", Значение: n2 }, { Показатель: "U", Значение: round(u) },
-      { Показатель: "z", Значение: round(z) }, { Показатель: "p-value", Значение: round(pValue, 6) }, { Показатель: "α", Значение: alpha }
+      { Показатель: "z", Значение: round(z) }, { Показатель: "p-value", Значение: round(pValue, 6) }
     ] },
     { type: "text", title: "Вывод", content: conclusion(pValue, alpha) }
   ]);
@@ -59,7 +76,7 @@ export function runWilcoxonSignedRankTest(dataset: Dataset, settings: Record<str
     { type: "table", title: "Критерий Уилкоксона", columns: ["Показатель", "Значение"], rows: [
       { Показатель: "n ненулевых разностей", Значение: n }, { Показатель: "W+", Значение: round(wPlus) },
       { Показатель: "W−", Значение: round(wMinus) }, { Показатель: "W", Значение: round(w) },
-      { Показатель: "z", Значение: round(z) }, { Показатель: "p-value", Значение: round(pValue, 6) }, { Показатель: "α", Значение: alpha }
+      { Показатель: "z", Значение: round(z) }, { Показатель: "p-value", Значение: round(pValue, 6) }
     ] },
     { type: "text", title: "Вывод", content: conclusion(pValue, alpha) }
   ]);
@@ -84,7 +101,7 @@ export function runKruskalWallisTest(dataset: Dataset, settings: Record<string, 
     { type: "table", title: "Критерий Краскела–Уоллиса", columns: ["Показатель", "Значение"], rows: [
       { Показатель: "Количество групп", Значение: groups.length }, { Показатель: "n", Значение: n },
       { Показатель: "H", Значение: round(h) }, { Показатель: "df", Значение: df },
-      { Показатель: "p-value", Значение: round(pValue, 6) }, { Показатель: "α", Значение: alpha }
+      { Показатель: "p-value", Значение: round(pValue, 6) }
     ] },
     { type: "text", title: "Вывод", content: conclusion(pValue, alpha) }
   ]);
@@ -104,7 +121,7 @@ export function runSignTest(dataset: Dataset, settings: Record<string, unknown>)
     { type: "table", title: "Критерий знаков", columns: ["Показатель", "Значение"], rows: [
       { Показатель: "Положительные разности", Значение: positive }, { Показатель: "Отрицательные разности", Значение: negative },
       { Показатель: "n без нулевых разностей", Значение: signs.length }, { Показатель: "Статистика", Значение: statistic },
-      { Показатель: "p-value", Значение: round(pValue, 6) }, { Показатель: "α", Значение: alpha }
+      { Показатель: "p-value", Значение: round(pValue, 6) }
     ] },
     { type: "text", title: "Вывод", content: conclusion(pValue, alpha) }
   ]);

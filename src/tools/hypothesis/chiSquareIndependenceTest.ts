@@ -93,13 +93,16 @@ export function runChiSquareIndependenceTest(
       ? "Между переменными есть статистически значимая связь."
       : "Статистически значимой связи между переменными не обнаружено.";
 
-  const observedRows = rowCategories.map((category, rowIndex) => {
+  const frequencyRows = rowCategories.map((category, rowIndex) => {
     const row: Record<string, string | number> = {
       [rowColumn]: category
     };
 
     columnCategories.forEach((columnCategory, columnIndex) => {
-      row[columnCategory] = observed[rowIndex][columnIndex];
+      const observedValue = observed[rowIndex][columnIndex];
+      const expectedValue = expected[rowIndex][columnIndex];
+      const difference = observedValue - expectedValue;
+      row[columnCategory] = `${observedValue} (${expectedValue.toFixed(2)}) | ${difference.toFixed(2)}`;
     });
 
     row["Итого"] = rowTotals[rowIndex];
@@ -107,30 +110,12 @@ export function runChiSquareIndependenceTest(
     return row;
   });
 
-  const expectedRows = rowCategories.map((category, rowIndex) => {
-    const row: Record<string, string | number> = {
-      [rowColumn]: category
-    };
-
-    columnCategories.forEach((columnCategory, columnIndex) => {
-      row[columnCategory] = Number(expected[rowIndex][columnIndex].toFixed(2));
-    });
-
-    return row;
-  });
-
   return createCalculationResult([
     {
       type: "table",
-      title: "Наблюдаемые частоты",
+      title: "Таблица частот",
       columns: [rowColumn, ...columnCategories, "Итого"],
-      rows: observedRows
-    },
-    {
-      type: "table",
-      title: "Ожидаемые частоты",
-      columns: [rowColumn, ...columnCategories],
-      rows: expectedRows
+      rows: frequencyRows
     },
     {
       type: "table",
@@ -141,8 +126,7 @@ export function runChiSquareIndependenceTest(
         { Показатель: "Переменная 2", Значение: columnColumn },
         { Показатель: "χ²", Значение: Number(chiSquare.toFixed(4)) },
         { Показатель: "df", Значение: df },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {

@@ -7,11 +7,16 @@ function cellStyle(value: number) {
   if (!Number.isFinite(value)) {
     return { background: "#f4f4f0", color: "#686865" };
   }
-  const normalized = (Math.max(-1, Math.min(1, value)) + 1) / 2;
-  const lightness = 96 - normalized * 80;
+
+  const clamped = Math.max(-1, Math.min(1, value));
+  const intensity = Math.abs(clamped);
+  const hue = clamped < 0 ? 213 : 2;
+  const saturation = 72;
+  const lightness = 96 - intensity * 48;
+
   return {
-    background: `hsl(0 0% ${lightness}%)`,
-    color: lightness < 48 ? "#ffffff" : "#111111"
+    background: `hsl(${hue} ${saturation}% ${lightness}%)`,
+    color: intensity > 0.62 ? "#ffffff" : "#111111"
   };
 }
 
@@ -20,7 +25,7 @@ export function CorrelationHeatmap({ labels, matrix }: CorrelationHeatmapProps) 
     <div className="heatmap-wrapper">
       <div
         className="heatmap-grid"
-        style={{ gridTemplateColumns: `minmax(140px, 1.2fr) repeat(${labels.length}, minmax(84px, 1fr))` }}
+        style={{ gridTemplateColumns: `minmax(96px, 1.15fr) repeat(${labels.length}, minmax(0, 1fr))` }}
       >
         <div className="heatmap-corner">Переменная</div>
         {labels.map((label) => <div className="heatmap-column-label" key={label}>{label}</div>)}

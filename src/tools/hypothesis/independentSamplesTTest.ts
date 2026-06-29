@@ -4,6 +4,7 @@ import { createCalculationResult, type CalculationResult } from "../../types/res
 import { mean, sampleVariance, validateNumericSample } from "../../lib/numeric";
 
 type Alternative = "two-sided" | "less" | "greater";
+type CompareMode = "columns" | "groups";
 
 function getPValue(t: number, df: number, alternative: Alternative): number {
   if (alternative === "less") {
@@ -29,34 +30,80 @@ function getGroupValues(
     .filter((value) => typeof value === "number" && !Number.isNaN(value)) as number[];
 }
 
+function getColumnValues(dataset: Dataset, column: string): number[] {
+  return dataset.rows
+    .map((row) => row[column])
+    .filter((value) => typeof value === "number" && !Number.isNaN(value)) as number[];
+}
+
+function getCategoryValues(dataset: Dataset, column: string): string[] {
+  return Array.from(
+    new Set(
+      dataset.rows
+        .map((row) => row[column])
+        .filter((value) => value !== null && value !== undefined && value !== "")
+        .map(String)
+    )
+  );
+}
+
 export function runIndependentSamplesTTest(
   dataset: Dataset,
   settings: Record<string, unknown>
 ): CalculationResult {
+  const compareMode = (settings.compareMode as CompareMode) ?? "groups";
+  const firstColumn = String(settings.firstColumn ?? "");
+  const secondColumn = String(settings.secondColumn ?? "");
   const valueColumn = String(settings.valueColumn);
   const groupColumn = String(settings.groupColumn);
-  const group1Value = String(settings.group1Value);
-  const group2Value = String(settings.group2Value);
   const alpha = Number(settings.alpha);
   const alternative = settings.alternative as Alternative;
-
-  if (!valueColumn || !groupColumn || !group1Value || !group2Value) {
-    throw new Error("Выберите переменную, группирующий столбец и две группы.");
-  }
-
-  if (group1Value === group2Value) {
-    throw new Error("Выберите две разные группы.");
-  }
 
   if (Number.isNaN(alpha) || alpha <= 0 || alpha >= 1) {
     throw new Error("Уровень значимости α должен быть числом от 0 до 1.");
   }
 
-  const group1 = getGroupValues(dataset, valueColumn, groupColumn, group1Value);
-  const group2 = getGroupValues(dataset, valueColumn, groupColumn, group2Value);
+  let group1: number[];
+  let group2: number[];
+  let group1Label: string;
+  let group2Label: string;
+  let variableLabel: string;
 
-  validateNumericSample(group1, "Группа 1");
-  validateNumericSample(group2, "Группа 2");
+  if (compareMode === "columns") {
+    if (!firstColumn || !secondColumn) {
+      throw new Error("Выберите две числовые переменные.");
+    }
+
+    if (firstColumn === secondColumn) {
+      throw new Error("Выберите две разные переменные.");
+    }
+
+    group1 = getColumnValues(dataset, firstColumn);
+    group2 = getColumnValues(dataset, secondColumn);
+    group1Label = firstColumn;
+    group2Label = secondColumn;
+    variableLabel = `${firstColumn} vs ${secondColumn}`;
+  } else {
+    if (!valueColumn || !groupColumn) {
+      throw new Error("Выберите числовую переменную и группирующую переменную.");
+    }
+
+    const categories = getCategoryValues(dataset, groupColumn);
+
+    if (categories.length !== 2) {
+      throw new Error("Для сравнения по категориям выберите группирующую переменную с двумя значениями.");
+    }
+
+    const [group1Value, group2Value] = categories;
+    group1 = getGroupValues(dataset, valueColumn, groupColumn, group1Value);
+    group2 = getGroupValues(dataset, valueColumn, groupColumn, group2Value);
+    group1Label = `${groupColumn}: ${group1Value}`;
+    group2Label = `${groupColumn}: ${group2Value}`;
+    variableLabel = valueColumn;
+  }
+
+  validateNumericSample(group1, group1Label);
+  validateNumericSample(group2, group2Label);
 
   const n1 = group1.length;
   const n2 = group2.length;
@@ -88,18 +135,17 @@ export function runIndependentSamplesTTest(
       title: "Результаты t-теста для независимых выборок",
       columns: ["Показатель", "Значение"],
       rows: [
-        { Показатель: "Числовая переменная", Значение: valueColumn },
-        { Показатель: "Группа 1", Значение: group1Value },
+        { Показатель: "Сравниваемые данные", Значение: variableLabel },
+        { Показатель: "Группа 1", Значение: group1Label },
         { Показатель: "n₁", Значение: n1 },
         { Показатель: "Среднее 1", Значение: Number(mean1.toFixed(4)) },
-        { Показатель: "Группа 2", Значение: group2Value },
+        { Показатель: "Группа 2", Значение: group2Label },
         { Показатель: "n₂", Значение: n2 },
         { Показатель: "Среднее 2", Значение: Number(mean2.toFixed(4)) },
         { Показатель: "Разность средних", Значение: Number((mean1 - mean2).toFixed(4)) },
         { Показатель: "df", Значение: Number(df.toFixed(4)) },
         { Показатель: "t-статистика", Значение: Number(t.toFixed(4)) },
-        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) },
-        { Показатель: "α", Значение: alpha }
+        { Показатель: "p-value", Значение: Number(pValue.toFixed(6)) }
       ]
     },
     {

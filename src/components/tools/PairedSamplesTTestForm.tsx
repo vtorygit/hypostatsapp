@@ -12,8 +12,8 @@ export function PairedSamplesTTestForm({
   dataset,
   onRun
 }: PairedSamplesTTestFormProps) {
-  const [beforeColumn, setBeforeColumn] = useState(dataset.columns[0] ?? "");
-  const [afterColumn, setAfterColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
+  const [firstColumn, setFirstColumn] = useState(dataset.columns[0] ?? "");
+  const [secondColumn, setSecondColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
   const [alpha, setAlpha] = useState("0.05");
   const [alternative, setAlternative] = useState<Alternative>("two-sided");
 
@@ -21,8 +21,8 @@ export function PairedSamplesTTestForm({
     event.preventDefault();
 
     onRun({
-      beforeColumn,
-      afterColumn,
+      beforeColumn: firstColumn,
+      afterColumn: secondColumn,
       alpha: Number(alpha),
       alternative
     });
@@ -31,11 +31,11 @@ export function PairedSamplesTTestForm({
   return (
     <form className="tool-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="beforeColumn">Числовая переменная: первый замер</label>
+        <label htmlFor="firstColumn">Переменная 1</label>
         <select
-          id="beforeColumn"
-          value={beforeColumn}
-          onChange={(event) => setBeforeColumn(event.target.value)}
+          id="firstColumn"
+          value={firstColumn}
+          onChange={(event) => setFirstColumn(event.target.value)}
         >
           {dataset.columns.map((column) => (
             <option key={column} value={column}>
@@ -46,11 +46,11 @@ export function PairedSamplesTTestForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="afterColumn">Числовая переменная: второй замер</label>
+        <label htmlFor="secondColumn">Переменная 2</label>
         <select
-          id="afterColumn"
-          value={afterColumn}
-          onChange={(event) => setAfterColumn(event.target.value)}
+          id="secondColumn"
+          value={secondColumn}
+          onChange={(event) => setSecondColumn(event.target.value)}
         >
           {dataset.columns.map((column) => (
             <option key={column} value={column}>
@@ -81,9 +81,9 @@ export function PairedSamplesTTestForm({
           value={alternative}
           onChange={(event) => setAlternative(event.target.value as Alternative)}
         >
-          <option value="two-sided">μd ≠ 0</option>
-          <option value="less">μd &lt; 0</option>
-          <option value="greater">μd &gt; 0</option>
+          <option value="two-sided">μ₁ ≠ μ₂</option>
+          <option value="less">μ₁ &lt; μ₂</option>
+          <option value="greater">μ₁ &gt; μ₂</option>
         </select>
       </div>
 

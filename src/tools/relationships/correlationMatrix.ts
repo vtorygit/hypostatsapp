@@ -2,6 +2,7 @@ import type { Dataset } from "../../types/dataset";
 import { createCalculationResult, type CalculationResult } from "../../types/results";
 import { pearson, round, spearman } from "../../lib/statistics";
 import { inferColumnKind } from "../../lib/columnTypes";
+import { jStat } from "jstat";
 
 export type CorrelationMethod = "pearson" | "spearman";
 
@@ -28,9 +29,29 @@ export function calculateCorrelationMatrix(
   );
 }
 
+export function calculateCorrelationPValue(r: number, n: number): number {
+  if (!Number.isFinite(r) || n < 3 || Math.abs(r) >= 1) {
+    return Number.NaN;
+  }
+
+  const t = (r * Math.sqrt(n - 2)) / Math.sqrt(1 - r * r);
+  return 2 * (1 - jStat.studentt.cdf(Math.abs(t), n - 2));
+}
+
+function getPairs(dataset: Dataset, firstColumn: string, secondColumn: string): Array<[number, number]> {
+  return dataset.rows
+    .map((item) => [item[firstColumn], item[secondColumn]])
+    .filter(
+      (pair): pair is [number, number] =>
+        pair.every((value) => typeof value === "number" && Number.isFinite(value))
+    );
+}
+
 export function runCorrelationMatrix(dataset: Dataset, settings: Record<string, unknown>): CalculationResult {
   const columns = Array.isArray(settings.columns) ? settings.columns.map(String) : [];
   const method: CorrelationMethod = settings.method === "spearman" ? "spearman" : "pearson";
+  const showSignificance = Boolean(settings.showSignificance);
+  const alpha = Number(settings.alpha ?? 0.05);
   if (columns.length < 2) throw new Error("Выберите минимум два столбца.");
   if (columns.some((column) => inferColumnKind(dataset, column) !== "numeric")) {
     throw new Error("Корреляционная матрица строится только для числовых переменных.");
@@ -41,7 +62,17 @@ export function runCorrelationMatrix(dataset: Dataset, settings: Record<string, 
     const row: Record<string, string | number> = { Переменная: rowColumn };
     columns.forEach((column, columnIndex) => {
       const value = matrix[rowIndex][columnIndex];
-      row[column] = Number.isFinite(value) ? round(value) : "Не определено";
+      if (!Number.isFinite(value)) {
+        row[column] = "Не определено";
+        return;
+      }
+
+      const pairs = getPairs(dataset, rowColumn, column);
+      const pValue = calculateCorrelationPValue(value, pairs.length);
+      const significant = Number.isFinite(pValue) && pValue < alpha;
+      row[column] = showSignificance
+        ? `${value.toFixed(2)} (${significant ? "знач." : "незнач."} ${alpha})`
+        : round(value);
     });
     return row;
   });

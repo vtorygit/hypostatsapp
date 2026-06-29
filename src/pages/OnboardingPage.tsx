@@ -49,14 +49,6 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
               столбцов.
             </p>
           </div>
-
-          <div>
-            <h3>Токены обновляются каждый день</h3>
-            <p>
-              Баланс хранится локально и сбрасывается в начале нового дня по
-              московскому времени.
-            </p>
-          </div>
         </div>
 
         <button className="primary-button" onClick={handleComplete}>

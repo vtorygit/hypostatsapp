@@ -10,8 +10,14 @@ export function ChiSquareIndependenceForm({
   dataset,
   onRun
 }: ChiSquareIndependenceFormProps) {
-  const [rowColumn, setRowColumn] = useState(dataset.columns[0] ?? "");
-  const [columnColumn, setColumnColumn] = useState(dataset.columns[1] ?? dataset.columns[0] ?? "");
+  const [rowColumn, setRowColumn] = useState(
+    dataset.columns.includes("Gender") ? "Gender" : dataset.columns[0] ?? ""
+  );
+  const [columnColumn, setColumnColumn] = useState(
+    dataset.columns.includes("Sleep Disorder")
+      ? "Sleep Disorder"
+      : dataset.columns[1] ?? dataset.columns[0] ?? ""
+  );
   const [alpha, setAlpha] = useState("0.05");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

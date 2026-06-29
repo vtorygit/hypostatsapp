@@ -10,7 +10,6 @@ const TESTS = [
   ["independent-samples-t-test", "t-тест для независимых выборок"],
   ["paired-samples-t-test", "Парный t-тест"],
   ["chi-square-independence-test", "χ²-критерий независимости"],
-  ["chi-square-goodness-of-fit-test", "χ²-критерий согласия"],
   ["mann-whitney-u-test", "Критерий Манна–Уитни"],
   ["wilcoxon-signed-rank-test", "Критерий Уилкоксона"],
   ["kruskal-wallis-test", "Критерий Краскела–Уоллиса"],
@@ -89,18 +88,13 @@ export function StatisticalTestCalculatorForm({ onRun }: ToolFormProps) {
       </>}
 
       {(["paired-samples-t-test", "wilcoxon-signed-rank-test", "sign-test"].includes(testId)) && <>
-        {valuesField("Числовая переменная: первый замер", "beforeValues")}
-        {valuesField("Числовая переменная: второй замер", "afterValues")}
+        {valuesField("Переменная 1", "beforeValues")}
+        {valuesField("Переменная 2", "afterValues")}
       </>}
 
       {testId === "chi-square-independence-test" && <>
         {valuesField("Первая переменная", "category1Values", "Например: да; нет; да; да", "Категории вводятся через точку с запятой.")}
         {valuesField("Вторая переменная", "category2Values", "Например: группа A; группа B; группа A; группа B", "Введите столько же наблюдений в том же порядке.")}
-      </>}
-
-      {testId === "chi-square-goodness-of-fit-test" && <>
-        {valuesField("Наблюдаемые частоты", "observedCounts", "Например: 25 40 35")}
-        {valuesField("Ожидаемые доли", "expectedProportions", "Например: 0,25 0,5 0,25")}
       </>}
 
       {testId === "kruskal-wallis-test" && <div className="form-group">

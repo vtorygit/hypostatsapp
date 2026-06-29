@@ -6,7 +6,6 @@ import { runOneSampleTTest } from "../hypothesis/oneSampleTTest";
 import { runIndependentSamplesTTest } from "../hypothesis/independentSamplesTTest";
 import { runPairedSamplesTTest } from "../hypothesis/pairedSamplesTTest";
 import { runChiSquareIndependenceTest } from "../hypothesis/chiSquareIndependenceTest";
-import { runChiSquareGoodnessOfFitTest } from "../hypothesis/chiSquareGoodnessOfFitTest";
 import {
   runKruskalWallisTest,
   runMannWhitneyUTest,
@@ -141,23 +140,6 @@ export function runStatisticalTestCalculator(
       rowColumn: "first",
       columnColumn: "second",
       alpha
-    });
-  }
-
-  if (testId === "chi-square-goodness-of-fit-test") {
-    const observed = parseNumbers(settings.observedCounts, "Наблюдаемые частоты");
-    if (observed.some((value) => !Number.isInteger(value) || value <= 0)) {
-      throw new Error("Наблюдаемые частоты должны быть положительными целыми числами.");
-    }
-    const expected = parseNumbers(settings.expectedProportions, "Ожидаемые доли");
-    const rows = observed.flatMap((count, category) =>
-      Array.from({ length: count }, () => ({ category: `Категория ${category + 1}` }))
-    );
-    return runChiSquareGoodnessOfFitTest(makeDataset(["category"], rows), {
-      column: "category",
-      alpha,
-      expectedMode: "custom",
-      customExpectedRaw: expected.join(",")
     });
   }
 

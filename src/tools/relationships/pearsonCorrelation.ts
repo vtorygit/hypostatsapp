@@ -93,16 +93,8 @@ export function runPearsonCorrelation(
           Значение: yColumn
         },
         {
-          Показатель: "n",
-          Значение: n
-        },
-        {
           Показатель: "r",
           Значение: Number(r.toFixed(4))
-        },
-        {
-          Показатель: "t",
-          Значение: Number(t.toFixed(4))
         },
         {
           Показатель: "p-value",

@@ -44,7 +44,6 @@ export function ToolGroupPage() {
             >
               <h2>{tool.title}</h2>
               <p>{tool.description}</p>
-              <span className="card-meta">{tool.tokenCost} токенов</span>
             </Card>
           ))}
         </div>

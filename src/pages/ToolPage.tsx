@@ -6,7 +6,6 @@ import type { AnalysisResult, CalculationResult } from "../types/results";
 import { FileUploader } from "../components/data/FileUploader";
 import { DataPreview } from "../components/data/DataPreview";
 import { ResultBlocks } from "../components/results/ResultBlocks";
-import { spendTokens } from "../lib/storage";
 import { downloadXlsx } from "../lib/exports";
 
 export function ToolPage() {
@@ -62,13 +61,6 @@ export function ToolPage() {
     settings: Record<string, unknown>,
     activeDataset: Dataset | null = dataset
   ) {
-    const paid = spendTokens(tool.tokenCost);
-
-    if (!paid) {
-      setError("Недостаточно токенов для запуска анализа.");
-      return;
-    }
-
     try {
       let calculation: CalculationResult;
 

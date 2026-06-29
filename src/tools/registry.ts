@@ -5,7 +5,6 @@ import { runOneSampleTTest } from "./hypothesis/oneSampleTTest";
 import { runIndependentSamplesTTest } from "./hypothesis/independentSamplesTTest";
 import { runPairedSamplesTTest } from "./hypothesis/pairedSamplesTTest";
 import { runChiSquareIndependenceTest } from "./hypothesis/chiSquareIndependenceTest";
-import { runChiSquareGoodnessOfFitTest } from "./hypothesis/chiSquareGoodnessOfFitTest";
 import { runPearsonCorrelation } from "./relationships/pearsonCorrelation";
 import { runSpearmanCorrelation } from "./relationships/spearmanCorrelation";
 import { runSampleSizeProportionCalculator } from "./calculators/sampleSizeProportion";
@@ -18,7 +17,7 @@ import { OneSampleTTestForm } from "../components/tools/OneSampleTTestForm";
 import { IndependentSamplesTTestForm } from "../components/tools/IndependentSamplesTTestForm";
 import { PairedSamplesTTestForm } from "../components/tools/PairedSamplesTTestForm";
 import { ChiSquareIndependenceForm } from "../components/tools/ChiSquareIndependenceForm";
-import { ChiSquareGoodnessOfFitForm } from "../components/tools/ChiSquareGoodnessOfFitForm";
+import { ChiSquareIndependenceResult } from "../components/results/ChiSquareIndependenceResult";
 import { CorrelationForm } from "../components/tools/CorrelationForm";
 import { SampleSizeProportionForm } from "../components/tools/SampleSizeProportionForm";
 import { ZCriticalValueForm } from "../components/tools/ZCriticalValueForm";
@@ -140,18 +139,8 @@ export const tools: ToolDefinition[] = [
     tokenCost: 7,
     inputMode: "dataset",
     formComponent: ChiSquareIndependenceForm,
-    run: runChiSquareIndependenceTest
-  },
-  {
-    id: "chi-square-goodness-of-fit-test",
-    title: "χ²-критерий согласия",
-    groupId: "hypothesis-testing",
-    description:
-      "Проверяет, отличается ли наблюдаемое распределение одной категориальной переменной от ожидаемого.",
-    tokenCost: 7,
-    inputMode: "dataset",
-    formComponent: ChiSquareGoodnessOfFitForm,
-    run: runChiSquareGoodnessOfFitTest
+    run: runChiSquareIndependenceTest,
+    resultComponent: ChiSquareIndependenceResult
   },
   {
     id: "mann-whitney-u-test", title: "Критерий Манна–Уитни", groupId: "hypothesis-testing",
