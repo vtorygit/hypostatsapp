@@ -29,13 +29,13 @@ export function HomePage() {
       <div className="bento-grid">
         <Card variant="hero" className="bento-hero">
           <div className="hero-topline">
-            <span className="hero-index">01 / RESEARCH WORKSPACE</span>
+            <span className="hero-index">01 / РАБОЧЕЕ ПРОСТРАНСТВО</span>
             <span>v0.1.0</span>
           </div>
 
           <div className="hero-copy">
             <p className="eyebrow">Статистика без кода</p>
-            <h1>Research<br />Toolbox</h1>
+            <h1>Инструменты<br />Исследователя</h1>
             <p className="hero-description">
               От исследовательского вопроса к понятному результату — без R,
               Python, SPSS и ручных формул в Excel.
@@ -44,10 +44,8 @@ export function HomePage() {
 
           <div className="hero-footer">
             <div className="hero-facts">
-              <span>CSV / XLSX</span>
-              <span>Privacy by design.</span>
-              <span>Файлы остаются на вашем устройстве.</span>
-              <span>Сервер не участвует в анализе.</span>
+              <span>Для работы нужен файл CSV / XLSX</span>
+              <span>Вычисления осуществляются на вашем устройстве</span>
             </div>
           </div>
         </Card>
