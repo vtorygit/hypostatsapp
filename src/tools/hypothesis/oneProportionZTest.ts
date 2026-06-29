@@ -37,6 +37,9 @@ export function runOneProportionZTest(
   const hypothesizedProportion = Number(settings.hypothesizedProportion);
   const alpha = Number(settings.alpha);
   const alternative = settings.alternative as Alternative;
+  const successValues = Array.isArray(settings.successValues)
+    ? settings.successValues.map(String)
+    : [];
 
   if (
     Number.isNaN(successes) ||
@@ -90,6 +93,10 @@ export function runOneProportionZTest(
       rows: [
         { Показатель: "Количество успехов", Значение: successes },
         { Показатель: "Размер выборки", Значение: sampleSize },
+        {
+          Показатель: "Учитываемые значения",
+          Значение: successValues.length > 0 ? successValues.join(", ") : "—"
+        },
         {
           Показатель: "Наблюдаемая доля",
           Значение: Number(observedProportion.toFixed(4))

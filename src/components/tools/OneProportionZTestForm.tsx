@@ -1,37 +1,130 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DatasetToolFormProps } from "../../types/tools";
 
 type Alternative = "two-sided" | "less" | "greater";
+
+const MAX_CATEGORY_VALUES = 20;
+
+type CategorySummary = {
+  value: string;
+  count: number;
+};
+
+type ColumnSummary = {
+  name: string;
+  categories: CategorySummary[];
+  isLikelyContinuousNumeric: boolean;
+};
+
+function summarizeColumn(
+  dataset: DatasetToolFormProps["dataset"],
+  column: string
+): ColumnSummary {
+  const counts = new Map<string, number>();
+  let numericCount = 0;
+  let nonEmptyCount = 0;
+
+  dataset.rows.forEach((row) => {
+    const rawValue = row[column];
+
+    if (rawValue === null || rawValue === undefined || rawValue === "") {
+      return;
+    }
+
+    nonEmptyCount += 1;
+
+    if (typeof rawValue === "number") {
+      numericCount += 1;
+    } else if (!Number.isNaN(Number(String(rawValue).replace(",", ".")))) {
+      numericCount += 1;
+    }
+
+    const value = String(rawValue);
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+
+  const categories = Array.from(counts.entries())
+    .map(([value, count]) => ({ value, count }))
+    .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value, "ru"));
+
+  return {
+    name: column,
+    categories,
+    isLikelyContinuousNumeric:
+      nonEmptyCount > 0 &&
+      numericCount / nonEmptyCount >= 0.9 &&
+      categories.length > MAX_CATEGORY_VALUES
+  };
+}
 
 export function OneProportionZTestForm({
   dataset,
   onRun
 }: DatasetToolFormProps) {
   const [column, setColumn] = useState(dataset.columns[0] ?? "");
-  const [successValue, setSuccessValue] = useState("");
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [hypothesizedProportion, setHypothesizedProportion] = useState("0.5");
   const [alpha, setAlpha] = useState("0.05");
   const [alternative, setAlternative] = useState<Alternative>("two-sided");
+  const [selectionError, setSelectionError] = useState<string | null>(null);
 
-  const uniqueValues = useMemo(() => {
-    const values = dataset.rows
-      .map((row) => row[column])
-      .filter((value) => value !== null && value !== undefined && value !== "")
-      .map(String);
-    return Array.from(new Set(values)).slice(0, 50);
-  }, [dataset, column]);
+  const columnSummaries = useMemo(
+    () => dataset.columns.map((columnName) => summarizeColumn(dataset, columnName)),
+    [dataset]
+  );
+
+  const selectableColumns = useMemo(
+    () => columnSummaries.filter((summary) => !summary.isLikelyContinuousNumeric),
+    [columnSummaries]
+  );
+
+  const activeColumnSummary = useMemo(
+    () => columnSummaries.find((summary) => summary.name === column),
+    [column, columnSummaries]
+  );
+
+  useEffect(() => {
+    if (
+      column &&
+      columnSummaries.some(
+        (summary) => summary.name === column && !summary.isLikelyContinuousNumeric
+      )
+    ) {
+      return;
+    }
+
+    setColumn(selectableColumns[0]?.name ?? "");
+    setSelectedValues([]);
+  }, [column, columnSummaries, selectableColumns]);
+
+  function toggleSelectedValue(value: string) {
+    setSelectionError(null);
+    setSelectedValues((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (selectedValues.length === 0) {
+      setSelectionError("Выберите хотя бы одно значение признака.");
+      return;
+    }
+
     const eligibleRows = dataset.rows.filter(
       (row) => row[column] !== null && row[column] !== undefined && row[column] !== ""
     );
+    const selectedValueSet = new Set(selectedValues);
 
     onRun({
       successes: eligibleRows.filter(
-        (row) => String(row[column]) === successValue
+        (row) => selectedValueSet.has(String(row[column]))
       ).length,
       sampleSize: eligibleRows.length,
+      successValues: selectedValues,
       hypothesizedProportion: Number(hypothesizedProportion),
       alpha: Number(alpha),
       alternative
@@ -47,25 +140,76 @@ export function OneProportionZTestForm({
           value={column}
           onChange={(event) => {
             setColumn(event.target.value);
-            setSuccessValue("");
+            setSelectedValues([]);
+            setSelectionError(null);
           }}
+          disabled={selectableColumns.length === 0}
         >
-          {dataset.columns.map((columnName) => (
-            <option key={columnName} value={columnName}>{columnName}</option>
+          {columnSummaries.map((summary) => (
+            <option
+              key={summary.name}
+              value={summary.name}
+              disabled={summary.isLikelyContinuousNumeric}
+            >
+              {summary.isLikelyContinuousNumeric
+                ? `${summary.name} — слишком много числовых значений`
+                : summary.name}
+            </option>
           ))}
         </select>
       </div>
 
+      {selectableColumns.length === 0 && (
+        <div className="error-box">
+          В файле не найдено категориальных переменных для расчёта доли.
+        </div>
+      )}
+
+      {activeColumnSummary && !activeColumnSummary.isLikelyContinuousNumeric && (
+        <div className="form-group">
+          <h3>Число наблюдений по категориям</h3>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Значение</th>
+                  <th>Количество</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeColumnSummary.categories.map((category) => (
+                  <tr key={category.value}>
+                    <td>{category.value}</td>
+                    <td>{category.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div className="form-group">
-        <label htmlFor="successValue">Выберите значение признака</label>
-        <select id="successValue" value={successValue} onChange={(event) => setSuccessValue(event.target.value)} required>
-          <option value="">Выберите значение</option>
-          {uniqueValues.map((value) => <option key={value} value={value}>{value}</option>)}
-        </select>
+        <label>Выберите значение признака</label>
+        <div className="checkbox-list">
+          {activeColumnSummary?.categories.map((category) => (
+            <label key={category.value} className="checkbox-row">
+              <input
+                type="checkbox"
+                checked={selectedValues.includes(category.value)}
+                onChange={() => toggleSelectedValue(category.value)}
+              />
+              <span>{category.value}</span>
+              <strong>{category.count}</strong>
+            </label>
+          ))}
+        </div>
+        {selectionError && <div className="error-box">{selectionError}</div>}
       </div>
 
       <div className="form-group">
-        <label htmlFor="hypothesizedProportion">Проверяемая доля</label>
+        <label htmlFor="hypothesizedProportion">С каким значением сравнивается</label>
+        <p className="field-hint">Введите значение от 0 до 1.</p>
         <input id="hypothesizedProportion" type="number" min="0.001" max="0.999" step="0.001" value={hypothesizedProportion} onChange={(event) => setHypothesizedProportion(event.target.value)} placeholder="Введите значение доли" required />
       </div>
 
