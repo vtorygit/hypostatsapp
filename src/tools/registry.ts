@@ -29,6 +29,7 @@ import { SampleSizeMeanForm, ConfidenceIntervalMeanForm, ConfidenceIntervalPropo
 import { runCorrelationHeatmap, runCorrelationMatrix } from "./relationships/correlationMatrix";
 import { CorrelationHeatmapForm, CorrelationMatrixForm } from "../components/tools/CorrelationMatrixForm";
 import { CorrelationHeatmapResult } from "../components/results/CorrelationHeatmapResult";
+import { CorrelationMatrixResult } from "../components/results/CorrelationMatrixResult";
 import { runMultipleLinearRegression } from "./regression/multipleLinearRegression";
 import { MultipleLinearRegressionForm } from "../components/tools/MultipleLinearRegressionForm";
 import { MultipleLinearRegressionResult } from "../components/results/MultipleLinearRegressionResult";
@@ -187,7 +188,8 @@ export const tools: ToolDefinition[] = [
   {
     id: "correlation-matrix", title: "Корреляционная матрица", groupId: "relationships",
     description: "Строит матрицу корреляций Пирсона или Спирмена для нескольких переменных.", tokenCost: 6,
-    inputMode: "dataset", formComponent: CorrelationMatrixForm, run: runCorrelationMatrix
+    inputMode: "dataset", formComponent: CorrelationMatrixForm, run: runCorrelationMatrix,
+    resultComponent: CorrelationMatrixResult
   },
   {
     id: "correlation-heatmap", title: "Тепловая диаграмма", groupId: "relationships",
