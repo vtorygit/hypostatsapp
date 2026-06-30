@@ -3,6 +3,14 @@ type CorrelationHeatmapProps = {
   matrix: number[][];
 };
 
+function mixChannel(start: number, end: number, amount: number) {
+  return Math.round(start + (end - start) * amount);
+}
+
+function mixColor(start: [number, number, number], end: [number, number, number], amount: number) {
+  return `rgb(${mixChannel(start[0], end[0], amount)} ${mixChannel(start[1], end[1], amount)} ${mixChannel(start[2], end[2], amount)})`;
+}
+
 function cellStyle(value: number) {
   if (!Number.isFinite(value)) {
     return { background: "#f4f4f0", color: "#686865" };
@@ -10,12 +18,14 @@ function cellStyle(value: number) {
 
   const clamped = Math.max(-1, Math.min(1, value));
   const intensity = Math.abs(clamped);
-  const hue = clamped < 0 ? 213 : 2;
-  const saturation = 72;
-  const lightness = 96 - intensity * 48;
+  const neutral: [number, number, number] = [248, 250, 252];
+  const blue: [number, number, number] = [37, 99, 235];
+  const red: [number, number, number] = [220, 38, 38];
 
   return {
-    background: `hsl(${hue} ${saturation}% ${lightness}%)`,
+    background: clamped < 0
+      ? mixColor(neutral, blue, intensity)
+      : mixColor(neutral, red, intensity),
     color: intensity > 0.62 ? "#ffffff" : "#111111"
   };
 }
