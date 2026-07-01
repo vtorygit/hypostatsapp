@@ -12,13 +12,24 @@ function formatCoefficient(value: number) {
   return Number.isFinite(value) ? value.toFixed(2) : "—";
 }
 
+function formatPValue(value: number) {
+  if (!Number.isFinite(value)) {
+    return "p = —";
+  }
+
+  if (value < 0.001) {
+    return "p < 0.001";
+  }
+
+  return `p = ${value.toFixed(3)}`;
+}
+
 export function CorrelationMatrixResult({
   result,
   dataset,
   settings
 }: ToolResultProps) {
   const [showSignificance, setShowSignificance] = useState(false);
-  const [alpha, setAlpha] = useState("0.05");
 
   const columns = Array.isArray(settings.columns) ? settings.columns.map(String) : [];
   const method: CorrelationMethod = settings.method === "spearman" ? "spearman" : "pearson";
@@ -27,22 +38,20 @@ export function CorrelationMatrixResult({
     [dataset, columns.join("|"), method]
   );
   const otherBlocks = result.blocks.filter((block) => block.type !== "table");
-  const alphaValue = Number(alpha);
 
   function formatCell(value: number, rowColumn: string, column: string) {
     if (!Number.isFinite(value)) {
       return "—";
     }
 
-    if (!showSignificance || !dataset || !Number.isFinite(alphaValue)) {
+    if (!showSignificance || !dataset || rowColumn === column) {
       return formatCoefficient(value);
     }
 
     const pairs = getCorrelationPairs(dataset, rowColumn, column);
     const pValue = calculateCorrelationPValue(value, pairs.length);
-    const significant = Number.isFinite(pValue) && pValue < alphaValue;
 
-    return `${formatCoefficient(value)} (${significant ? "знач." : "незнач."} ${alphaValue})`;
+    return `${formatCoefficient(value)} (${formatPValue(pValue)})`;
   }
 
   return (
@@ -68,16 +77,9 @@ export function CorrelationMatrixResult({
           <div className="checkbox-list checkbox-list--inline">
             <label className="checkbox-row">
               <input type="checkbox" checked={showSignificance} onChange={(event) => setShowSignificance(event.target.checked)} />
-              <span>Показывать значимость</span>
+              <span>Показывать p-value</span>
             </label>
           </div>
-
-          {showSignificance && (
-            <div className="form-group matrix-alpha-control">
-              <label htmlFor="matrix-result-alpha">Уровень значимости α</label>
-              <input id="matrix-result-alpha" type="number" min="0.001" max="0.999" step="0.001" value={alpha} onChange={(event) => setAlpha(event.target.value)} />
-            </div>
-          )}
 
           <div className="table-scroll">
             <table>
